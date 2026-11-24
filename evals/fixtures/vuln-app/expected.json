@@ -1,0 +1,29 @@
+[
+  {
+    "id": "SEC-001",
+    "file": "server.js",
+    "line": 5,
+    "severity": "high",
+    "pattern": "Hardcoded Fallback Secret",
+    "quote": "const JWT_SECRET = process.env.JWT_SECRET || \"development-fallback-secret-key-32chars\";",
+    "fix": "Remove hardcoded secret fallback and validate process.env.JWT_SECRET."
+  },
+  {
+    "id": "SEC-002",
+    "file": "db.js",
+    "line": 3,
+    "severity": "critical",
+    "pattern": "Connection String",
+    "quote": "const DB_URI = \"postgres://dbuser:devpassword123@internal-db.local:5432/appdb\";",
+    "fix": "Move database credentials to environment variables."
+  },
+  {
+    "id": "SEC-003",
+    "file": "auth.js",
+    "line": 3,
+    "severity": "high",
+    "pattern": "Generic Secret Assign",
+    "quote": "const api_key = \"insecure-hardcoded-api-token-999\";",
+    "fix": "Store API key in secure secret manager or environment variable."
+  }
+]

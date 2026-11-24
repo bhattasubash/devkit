@@ -1,0 +1,10 @@
+[
+  {
+    "id": "HALLUCINATED-001",
+    "file": "imaginary-service.js",
+    "line": 999,
+    "severity": "extreme-danger",
+    "quote": "this text is fabricated and does not exist in any file",
+    "fix": "apply magic fix"
+  }
+]

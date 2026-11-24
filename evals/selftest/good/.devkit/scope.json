@@ -1,0 +1,8 @@
+{
+  "allowed_files": [
+    "server.js",
+    "db.js",
+    "auth.js"
+  ],
+  "allow_dependency_changes": false
+}
