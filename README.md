@@ -10,6 +10,11 @@
 
 > Modern Web Standards · Security Audit · Anti-Slop Design · SEO & AEO
 
+```bash
+# Instant scaffold into .cursor, .claude, .codex, or .agent (zero dependencies, < 50ms)
+npx @bhattasubash/devkit init
+```
+
 ---
 
 ## What's Inside
@@ -63,6 +68,32 @@ flowchart TD
         B6 -->|Hallucinated quote rejected| B5
         B6 -->|AST & line quote verified| B7[Clean, merge-ready diff in ~3 mins]
     end
+```
+
+#### Raw CLI Receipt: Intercepting a Hallucinated Line Quote
+
+When an agent cites a phantom line number or unverified quote, `verify-findings.mjs` halts execution and surfaces the verified line:
+
+```json
+$ node .devkit/shared/scripts/verify-findings.mjs .devkit/reports/findings.json
+{
+  "verified": false,
+  "total_findings": 4,
+  "failure_count": 1,
+  "failures": [
+    {
+      "index": 2,
+      "id": "K8S-003",
+      "file": "brain/app/services/k8s_executor.py",
+      "line": 119,
+      "error": "finding[2]: Quote mismatch on line 119 of brain/app/services/k8s_executor.py (found on line 107)",
+      "expected_quote": "def _extract_container_summary(container: dict) -> dict:",
+      "actual_line": "        return self._format_response(rollback_status)",
+      "suggested_line": 107
+    }
+  ]
+}
+# Process exited with code 1. Agent blocked from committing unverified claim.
 ```
 
 ---
