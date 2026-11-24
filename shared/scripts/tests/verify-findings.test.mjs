@@ -175,3 +175,63 @@ test('Fails with exit 1 when severity or fix is invalid', async () => {
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test('Passes with exit 0 when quote is within line drift tolerance (+/- 3 lines)', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'verify-drift-'));
+  try {
+    const code = [
+      '// Line 1',
+      '// Line 2: Added newline',
+      'const target = "sensitive_data";',
+      '// Line 4',
+    ].join('\n');
+    await writeFile(join(dir, 'app.js'), code);
+    const findings = [
+      {
+        id: 'SEC-DRIFT',
+        severity: 'high',
+        file: 'app.js',
+        line: 1, // Cited line 1, but actually on line 3 (+2 lines drift within tolerance)
+        quote: 'const target = "sensitive_data";',
+        fix: 'Fix data exposure',
+      },
+    ];
+    const findingsPath = join(dir, 'findings.json');
+    await writeFile(findingsPath, JSON.stringify(findings));
+
+    const res = runVerifier(findingsPath, ['--base', dir]);
+    assert.equal(res.exitCode, 0);
+    assert.equal(res.data.verified, true);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test('Provides suggested_line when quote exists elsewhere in file beyond tolerance', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'verify-suggest-'));
+  try {
+    const lines = Array(30).fill('// empty line');
+    lines[24] = 'function executeCriticalAction() { return true; }';
+    await writeFile(join(dir, 'app.js'), lines.join('\n'));
+    const findings = [
+      {
+        id: 'SEC-SUGGEST',
+        severity: 'medium',
+        file: 'app.js',
+        line: 5, // Far from line 25
+        quote: 'function executeCriticalAction()',
+        fix: 'Add permission check',
+      },
+    ];
+    const findingsPath = join(dir, 'findings.json');
+    await writeFile(findingsPath, JSON.stringify(findings));
+
+    const res = runVerifier(findingsPath, ['--base', dir]);
+    assert.equal(res.exitCode, 1);
+    assert.equal(res.data.verified, false);
+    assert.equal(res.data.failures[0].suggested_line, 25);
+    assert.match(res.data.failures[0].error, /found on line 25/);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});

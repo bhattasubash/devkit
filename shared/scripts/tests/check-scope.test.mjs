@@ -168,3 +168,37 @@ test('Passes with exit 0 when dependency file is modified and allow_dependency_c
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test('Ignores ephemeral test artifacts and custom ignored_files', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'scope-ignore-'));
+  try {
+    execFileSync(gitBin, ['init', '--quiet'], { cwd: dir });
+    execFileSync(gitBin, ['config', 'user.email', 'test@test.local'], { cwd: dir });
+    execFileSync(gitBin, ['config', 'user.name', 'Test'], { cwd: dir });
+
+    await writeFile(join(dir, 'app.js'), 'console.log("clean");\n');
+    execFileSync(gitBin, ['add', '.'], { cwd: dir });
+    execFileSync(gitBin, ['commit', '-m', 'init', '--quiet'], { cwd: dir });
+
+    // Modify allowed file
+    await writeFile(join(dir, 'app.js'), 'console.log("edited");\n');
+
+    // Create untracked ephemeral test database and pytest cache
+    await writeFile(join(dir, 'test.db-journal'), 'temp');
+    await writeFile(join(dir, 'custom-temp.log'), 'log data');
+
+    const scopeConfig = {
+      allowed_files: ['app.js'],
+      ignored_files: ['custom-temp.log'],
+      allow_dependency_changes: false,
+    };
+    const scopePath = join(dir, 'scope.json');
+    await writeFile(scopePath, JSON.stringify(scopeConfig));
+
+    const res = runScopeCli(scopePath, ['--cwd', dir]);
+    assert.equal(res.exitCode, 0);
+    assert.equal(res.data.valid, true);
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});

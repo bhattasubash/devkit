@@ -173,17 +173,53 @@ async function verifyAll() {
     const normQuote = normalizeWhitespace(String(f.quote));
     const normActual = normalizeWhitespace(actualLine);
 
-    if (!normActual.includes(normQuote)) {
-      failures.push({
-        index: idx,
-        id: f.id ?? null,
-        file: f.file,
-        line: lineNum,
-        error: `${indexStr}: Quote mismatch on line ${lineNum} of ${f.file}`,
-        expected_quote: normQuote,
-        actual_line: normActual,
-      });
+    if (normActual.includes(normQuote)) {
+      // Direct exact match on specified line
+      continue;
     }
+
+    // Check if within tolerance window (+/- 3 lines due to minor comment/import shifts)
+    let matchedToleranceLine = null;
+    const tolerance = 3;
+    const minLine = Math.max(1, lineNum - tolerance);
+    const maxLine = Math.min(lines.length, lineNum + tolerance);
+
+    for (let l = minLine; l <= maxLine; l++) {
+      if (l === lineNum) continue;
+      if (normalizeWhitespace(lines[l - 1]).includes(normQuote)) {
+        matchedToleranceLine = l;
+        break;
+      }
+    }
+
+    if (matchedToleranceLine) {
+      // Close match within tolerance window: accept with drift note
+      f.verified_line = matchedToleranceLine;
+      f.line_drift = matchedToleranceLine - lineNum;
+      continue;
+    }
+
+    // If not in tolerance window, find if it exists anywhere else in file to give a precise suggestion
+    let suggestedLine = null;
+    for (let l = 1; l <= lines.length; l++) {
+      if (normalizeWhitespace(lines[l - 1]).includes(normQuote)) {
+        suggestedLine = l;
+        break;
+      }
+    }
+
+    failures.push({
+      index: idx,
+      id: f.id ?? null,
+      file: f.file,
+      line: lineNum,
+      error: suggestedLine
+        ? `${indexStr}: Quote mismatch on line ${lineNum} of ${f.file} (found on line ${suggestedLine})`
+        : `${indexStr}: Quote mismatch on line ${lineNum} of ${f.file} (quote not found anywhere in file)`,
+      expected_quote: normQuote,
+      actual_line: normActual,
+      ...(suggestedLine ? { suggested_line: suggestedLine } : { hallucination_flag: true }),
+    });
   }
 
   if (failures.length > 0) {

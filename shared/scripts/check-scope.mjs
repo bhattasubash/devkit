@@ -191,6 +191,22 @@ async function checkScope() {
 
   const allowedFiles = Array.isArray(scope.allowed_files) ? scope.allowed_files : [];
   const allowDependencyChanges = Boolean(scope.allow_dependency_changes);
+  const userIgnored = Array.isArray(scope.ignored_files)
+    ? scope.ignored_files
+    : (Array.isArray(scope.ignore_patterns) ? scope.ignore_patterns : []);
+
+  const DEFAULT_EPHEMERAL_PATTERNS = [
+    '**/.pytest_cache/**',
+    '**/__pycache__/**',
+    '**/*.pyc',
+    '**/*.sqlite-journal',
+    '**/*.db-journal',
+    '**/coverage/**',
+    '**/.coverage',
+    '**/.turbo/**',
+    '**/*.tmp',
+  ];
+  const allIgnored = [...DEFAULT_EPHEMERAL_PATTERNS, ...userIgnored];
 
   const changedFiles = getChangedFiles(repoDir, againstRef);
 
@@ -204,6 +220,11 @@ async function checkScope() {
 
     // Ignore the scope configuration file itself and .devkit internal metadata
     if (fullFilePath === normScopeRel || normFile === 'scope.json' || normFile.endsWith('/scope.json') || normFile.startsWith('.devkit/')) {
+      continue;
+    }
+
+    // Ignore ephemeral runtime test artifacts and user-configured ignores
+    if (matchesAnyGlob(file, allIgnored)) {
       continue;
     }
 
