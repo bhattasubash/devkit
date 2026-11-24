@@ -16,23 +16,23 @@
 |-------|------------|--------------|
 | [**web-best-practices**](web-best-practices/) | Building or reviewing any frontend | Modern web APIs, accessibility, performance, code quality — the checks that catch what models get wrong |
 | [**security-audit**](security-audit/) | "audit", "review security", before launch | 3-tier security checklist with adversarial verification and zero-dependency scanner scripts |
-| [**anti-slop-design**](anti-slop-design/) | UI, landing pages, redesigns | Kills the 30+ visual tells that scream "AI-generated" and enforces design tokens, component states, and responsive layout |
+| [**anti-slop-design**](anti-slop-design/) | UI, landing pages, redesigns | Kills the visual tells that scream "AI-generated" and enforces design tokens, component states, and responsive layout |
 | [**seo-audit**](seo-audit/) | A URL + "SEO", "audit my site" | Technical SEO, on-page essentials, structured data validation, and Answer Engine Optimization for AI assistants |
 
 ## Install
 
 ```bash
 # Claude Code — all skills, global
-git clone https://github.com/YOUR_USER/devkit.git ~/.claude/skills/devkit
+git clone https://github.com/bhattasubash/devkit.git ~/.claude/skills/devkit
 
 # Cursor — project-level
-git clone https://github.com/YOUR_USER/devkit.git .cursor/skills/devkit
+git clone https://github.com/bhattasubash/devkit.git .cursor/skills/devkit
 
 # Codex CLI — global
-git clone https://github.com/YOUR_USER/devkit.git ~/.agents/skills/devkit
+git clone https://github.com/bhattasubash/devkit.git ~/.agents/skills/devkit
 
 # Any agent — single skill
-npx skills add YOUR_USER/devkit --skill web-best-practices
+npx skills add bhattasubash/devkit --skill web-best-practices
 ```
 
 ## Usage
@@ -66,7 +66,7 @@ Or invoke directly:
 └──────────────────────────────────────────────────────────┘
 ```
 
-- **Two modes.** Quick (3–4 phases) for small tasks — the default. Full (6–12 phases) for production launches.
+- **Two modes.** Quick (3 phases) for small tasks — the default. Full (6–7 phases) for production launches.
 - **State file.** `.devkit/<skill>/state.json` records progress, decisions, and evidence. Any agent or session can resume where the last one stopped.
 - **Hard gates.** The agent stops for your approval at defined checkpoints. No phase passes without proof — test output, scan results, or your explicit sign-off.
 - **Lazy loading.** SKILL.md is short. Detail lives in `references/` and loads only when that phase needs it. The agent never skims a wall of text.

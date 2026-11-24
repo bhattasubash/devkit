@@ -40,7 +40,7 @@ Reads and writes `.devkit/seo/state.json`. Fields: `skill`, `mode`, `phase`, `ur
 
 ## Reference Loading
 
-- Load `references/technical-seo.md` at **Crawl** (Quick) or **Technical** (Full).
+- Load `references/technical-seo.md` at **Check** (Quick) or **Technical** (Full).
 - Load `references/on-page-checklist.md` at **Check** (Quick) or **On-Page** (Full).
 - Load `references/structured-data.md` at **Check** (Quick) or **Structured Data** (Full).
 - Load `references/aeo.md` at **Check** (Quick) or **AEO** (Full).

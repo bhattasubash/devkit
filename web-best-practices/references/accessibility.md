@@ -4,7 +4,9 @@ Load this file during the **Accessibility Deep-Dive** phase (Full mode) or when 
 
 ---
 
-## Non-Negotiable Requirements (WCAG 2.1 AA)
+## Non-Negotiable Requirements (WCAG 2.2 AA)
+
+> WCAG 2.2 is a W3C Recommendation since October 2023. It supersedes WCAG 2.1 and adds new AA criteria including Focus Not Obscured, Dragging Movements, and Accessible Authentication.
 
 ### Color Contrast
 
@@ -76,9 +78,32 @@ Load this file during the **Accessibility Deep-Dive** phase (Full mode) or when 
 
 | Requirement | Specification |
 |-------------|---------------|
-| Minimum target size | 44×44 CSS pixels for all interactive elements (buttons, links, checkboxes, radio buttons) |
+| Minimum target size (AA) | 24×24 CSS pixels for all interactive elements. This is the WCAG 2.2 AA minimum (SC 2.5.8 Target Size Minimum). |
+| Enhanced target size (AAA) | 44×44 CSS pixels. This is the AAA criterion (SC 2.5.5 Target Size Enhanced). Recommended for primary actions and mobile touch targets. |
 | Spacing between targets | At least 8px gap between adjacent touch targets to prevent accidental taps |
-| Inline link exception | Text links within paragraphs are exempt from 44px height but should have adequate padding |
+| Inline link exception | Text links within paragraphs are exempt from the minimum size but should have adequate padding |
+
+### Focus Not Obscured (WCAG 2.2 AA — SC 2.4.11)
+
+| Requirement | Implementation |
+|-------------|----------------|
+| Focused element not fully hidden | When an element receives keyboard focus, it must not be entirely hidden by sticky headers, footers, chat widgets, or other fixed-position content. At least part of the focused element must be visible. |
+| Sticky header compensation | Use `scroll-padding-top` matching the sticky header height to prevent focused elements from scrolling behind it |
+
+### Dragging Movements (WCAG 2.2 AA — SC 2.5.7)
+
+| Requirement | Implementation |
+|-------------|----------------|
+| No drag-only operations | Any operation that uses dragging (drag-and-drop, sliders, sortable lists) must also be operable with a single pointer action (click, tap) without dragging. For example: a sortable list should also have up/down buttons or a move-to menu. |
+| Slider alternative | Range sliders must also accept direct text input or increment/decrement buttons |
+
+### Accessible Authentication (WCAG 2.2 AA — SC 3.3.8)
+
+| Requirement | Implementation |
+|-------------|----------------|
+| No cognitive function test | Authentication must not require memorizing passwords, solving puzzles, or recognizing objects unless a mechanism like paste, password manager autofill, or a passkey is available |
+| Copy-paste allowed | Never block paste in password or authentication code fields |
+| Passkeys/OAuth supported | Provide a non-cognitive authentication path where possible |
 
 ### Error Identification
 

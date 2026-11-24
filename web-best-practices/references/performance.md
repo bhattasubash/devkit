@@ -43,7 +43,7 @@ Load this file during the **Performance Tune** phase (Full mode) or **Verify** p
 
 | Requirement | Implementation |
 |-------------|----------------|
-| Critical CSS inline | Inline the CSS needed for above-the-fold content in a `<style>` tag in `<head>`. Load the rest with `<link rel="stylesheet" media="print" onload="this.media='all'">` or dynamically |
+| Critical CSS inline | Inline the CSS needed for above-the-fold content in a `<style>` tag in `<head>`. Load the rest asynchronously with `<link rel="stylesheet" media="print" onload="this.media='all'">` or via JS. Note: the `onload` handler is an inline event attribute — if the project has a strict CSP blocking inline scripts, use a preload pattern instead: `<link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">` with a `<noscript>` fallback, or load the stylesheet via a small external script. |
 | Defer non-critical JS | Use `<script defer>` for all non-critical JavaScript. Use `<script async>` only for independent analytics or third-party scripts |
 | Preload key resources | Add `<link rel="preload">` for the LCP image, critical font, and any above-the-fold resource discovered late by the browser |
 | Fetch priority | Set `fetchpriority="high"` on the LCP element (image or background). Set `fetchpriority="low"` on below-fold images and non-critical scripts |
@@ -67,16 +67,13 @@ Load this file during the **Performance Tune** phase (Full mode) or **Verify** p
 
 ### Running Lighthouse
 
-**CLI (recommended for CI):**
-```bash
-npx lighthouse https://your-site.com --output=html --output-path=./lighthouse-report.html
-```
-
-**DevTools:**
+**DevTools (recommended — no install required):**
 1. Open Chrome DevTools → Lighthouse tab
 2. Select categories: Performance, Accessibility, Best Practices, SEO
 3. Choose device: Mobile (primary) and Desktop (secondary)
 4. Click "Analyze page load"
+
+> **Note:** Lighthouse measures LCP and CLS in lab conditions but **cannot measure real INP** because it does not interact with the page. To verify INP, use Chrome DevTools Performance panel: record a session, click/type through the main flow, and check the "Interactions" track for delays > 200ms. For field data, check PageSpeed Insights (https://pagespeed.web.dev/) which reports real Chrome user data (CrUX) when available.
 
 ### Target Scores
 
@@ -89,7 +86,17 @@ npx lighthouse https://your-site.com --output=html --output-path=./lighthouse-re
 
 ### Reading the Report
 
-1. **Performance**: Check LCP, INP, and CLS values against targets above. Expand each metric to see the specific element and timing breakdown.
+1. **Performance**: Check LCP and CLS values against targets above. Expand each metric to see the specific element and timing breakdown. For INP, use the Performance panel interaction recording (Lighthouse cannot measure INP).
 2. **Opportunities**: Each item shows estimated savings in seconds/KB. Prioritize by impact.
-3. **Diagnostics**: Review "Avoid long main-thread tasks" and "Minimize main-thread work" for INP issues.
+3. **Diagnostics**: Review "Avoid long main-thread tasks" and "Minimize main-thread work" for potential INP issues.
 4. **Treemap**: Use the JavaScript treemap (bottom of report) to identify oversized bundles.
+
+### Verifying INP
+
+INP requires real interaction — Lighthouse lab tests cannot measure it.
+
+1. Open Chrome DevTools → Performance tab
+2. Click Record, then interact with the page (clicks, taps, keypresses through the main user flow)
+3. Stop recording. Look at the "Interactions" track.
+4. Any interaction with a delay > 200ms is an INP issue.
+5. For field data: check PageSpeed Insights for CrUX data (real Chrome users). Field data is authoritative.

@@ -10,7 +10,7 @@ Every visual value that repeats must live in a declared CSS custom property. No 
 
 | Category | Token Pattern | Example | Rule |
 |----------|--------------|---------|------|
-| **Neutrals** | `--color-neutral-{step}` | `--color-neutral-50` through `--color-neutral-950` | 9 steps: 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950. Light mode body background: 50. Dark mode body background: 900 or 950. |
+| **Neutrals** | `--color-neutral-{step}` | `--color-neutral-50` through `--color-neutral-950` | 11 steps: 50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950. Light mode body background: 50. Dark mode body background: 900 or 950. |
 | **Brand** | `--color-brand-{step}` | `--color-brand-500` | At least 3 steps (light, base, dark). Used for primary buttons, active states, links. |
 | **Accent** | `--color-accent-{step}` | `--color-accent-500` | 1 accent color. Used sparingly for secondary actions, highlights. |
 | **Semantic** | `--color-{name}` | `--color-success`, `--color-warning`, `--color-danger`, `--color-info` | 4 semantic colors. Each with a background tint variant (`--color-success-bg`). |
@@ -31,7 +31,7 @@ Run these grep/search commands during Audit. Each match outside `:root` or token
 2. **Literal fonts**: Search for `font-family:` values that are not `var(--font-*)`.
 3. **Literal spacing**: Search for `margin:`, `padding:`, `gap:` values in `px` that are not multiples of your base unit (4 or 8).
 4. **Important overrides**: Search for `!important`. Each instance means broken specificity — fix the cascade instead.
-5. **Color count**: Count unique color values across all CSS. Total should be < 20 (tokens define the palette, usage references them).
+5. **Color count**: Count unique color values across all CSS. Total should be under 30 (tokens define the palette, usage references them). The template below uses ~26 — real projects will vary. The goal is a bounded, intentional palette.
 
 ---
 
@@ -54,22 +54,22 @@ Copy this as a starting point. Replace values with the project's actual brand co
   --color-neutral-900: #171717;
   --color-neutral-950: #0a0a0a;
 
-  /* Brand */
+  /* Brand — chosen for 4.5:1+ contrast with white text */
   --color-brand-400: #60a5fa;
-  --color-brand-500: #3b82f6;
-  --color-brand-600: #2563eb;
+  --color-brand-500: #2563eb;
+  --color-brand-600: #1d4ed8;
 
-  /* Accent */
-  --color-accent-500: #f59e0b;
+  /* Accent — 3:1+ contrast on neutral-50 */
+  --color-accent-500: #b45309;
 
-  /* Semantic */
-  --color-success: #16a34a;
+  /* Semantic — all pass 4.5:1 contrast on their background tints */
+  --color-success: #15803d;
   --color-success-bg: #f0fdf4;
-  --color-warning: #ca8a04;
+  --color-warning: #a16207;
   --color-warning-bg: #fefce8;
-  --color-danger: #dc2626;
+  --color-danger: #b91c1c;
   --color-danger-bg: #fef2f2;
-  --color-info: #2563eb;
+  --color-info: #1d4ed8;
   --color-info-bg: #eff6ff;
 
   /* Typography */
@@ -139,5 +139,8 @@ Copy this as a starting point. Replace values with the project's actual brand co
 
 Check text contrast at token declaration time:
 - `--color-neutral-950` on `--color-neutral-50` → must exceed 4.5:1 for body text.
-- `--color-brand-500` on `--color-neutral-50` → must exceed 3:1 for large text and UI components.
-- Use browser DevTools color picker or an online contrast checker to verify.
+- `--color-brand-500` used as button background with white text → must exceed 4.5:1.
+- Semantic colors on their `*-bg` variants → must exceed 4.5:1.
+- `--color-accent-500` on `--color-neutral-50` → must exceed 3:1 for large text and UI components.
+- Use browser DevTools color picker or an online contrast checker (e.g., webaim.org/resources/contrastchecker) to verify.
+- **If your project's brand colors fail contrast**, darken them until they pass. The template above is pre-verified.

@@ -24,8 +24,8 @@ Walk every table during the **Audit** phase. For each pattern found, record: fil
 | Inter, Geist, or Space Grotesk chosen by habit | A typeface chosen to match the brand. These fonts are fine — when chosen deliberately with a stated reason. | When the font is intentionally chosen for the brand and documented. | Reflex |
 | Trending display fonts (Instrument Serif, etc.) | A type pairing drawn from your references or brand guidelines. | When the display font is a deliberate brand choice, not a trend follow. | Reflex |
 | Excessive italics, negative kerning, mono font overuse | Italics for emphasis only. Mono only for code. Normal kerning. Each treatment has one job. | Mono as the primary face only for developer tools. | Reflex |
-| ALL CAPS subtitles, eyebrow labels above every heading, tracked small caps | Sentence case or lowercase. Labels in the body face, one step smaller. An eyebrow only where it adds information the heading doesn't. | A single ALL CAPS label (e.g., a category tag) where information hierarchy demands it. State which one and why. | Floor |
-| Periods at the end of titles and headings | Titles without trailing periods. Apply consistently. | Never in titles. | Floor |
+| ALL CAPS subtitles, eyebrow labels above every heading, tracked small caps | Sentence case or lowercase. Labels in the body face, one step smaller. An eyebrow only where it adds information the heading doesn't. | A single ALL CAPS label (e.g., a category tag) where information hierarchy demands it. State which one and why. | Reflex |
+| Periods at the end of titles and headings | Titles without trailing periods. Apply consistently. | Never in titles. | Reflex |
 | Em dashes (—) scattered through copy | Plain punctuation. Rewrite the sentence to not need an em dash. | One em dash per page max, in a deliberate aside. | Finish |
 
 ---
@@ -39,7 +39,7 @@ Walk every table during the **Audit** phase. For each pattern found, record: fil
 | Standard 3-tier pricing section with Good/Better/Best | A price layout that follows your real plans, which may be one plan or two. | When you actually have 3 plans. But style it your way, not the AI default. | Reflex |
 | Borders and dividers around everything | Space and alignment to group related items. A border only to separate genuinely distinct regions. | A data table where borders aid readability. | Reflex |
 | Tags, pills, and badges on every item | Plain text labels. A status chip only for a real state (active, pending, error). | A content management UI where status indicators are functional. | Reflex |
-| Excessive soft corner radii, squircles on everything | One or two radius values from your token set (`--radius-sm`, `--radius-md`). Apply consistently. | Never more than 3 radius values in one project. | Floor |
+| Excessive soft corner radii, squircles on everything | One or two radius values from your token set (`--radius-sm`, `--radius-md`). Apply consistently. | Never more than 3 radius values in one project. | Reflex |
 | Over-detailed UI mockups and wireframes | Show the one screen or flow that proves the point. | Never. Show the real product, not a mockup of it. | Finish |
 
 ---

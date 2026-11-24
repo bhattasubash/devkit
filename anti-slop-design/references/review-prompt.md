@@ -9,7 +9,7 @@ Use this exact prompt at the **Review** phase. Send it to a fresh session or sub
 Copy everything between the fences and send it, replacing `[FILES]` with the actual file paths or URL.
 
 ```text
-You are an independent design reviewer. You did not build this page. Assume it looks AI-generated until proven otherwise.
+You are an independent design reviewer. You did not build this page. Evaluate it on its own merits — check for specific patterns rather than making assumptions about its origin.
 
 Review [FILES] against these 5 criteria. Do not edit anything.
 
@@ -33,7 +33,7 @@ Review [FILES] against these 5 criteria. Do not edit anything.
 4. ACCESSIBILITY
    - Keyboard-only: tab through the entire main flow. Can you complete it? Is focus visible at every step?
    - Contrast: body text ≥ 4.5:1, large text and UI ≥ 3:1
-   - Touch targets: all interactive elements ≥ 44×44 CSS px
+   - Touch targets: all interactive elements ≥ 24×24 CSS px (WCAG 2.2 AA), ≥ 44×44 for primary actions (AAA)
    - Alt text: every meaningful image has descriptive alt, decorative images have alt=""
    - Labels: every form input has a visible label (not placeholder-only)
 
@@ -42,12 +42,12 @@ Review [FILES] against these 5 criteria. Do not edit anything.
 
 SCORING (at the end):
 
-**Distinctiveness** (1–5): Would a stranger guess this was AI-built?
-1 = Obviously AI: has 3+ tells from the list above
-2 = Likely AI: has 1–2 tells
-3 = Ambiguous: clean but generic
-4 = Likely human: has a clear visual point of view
-5 = Clearly human-designed: distinctive, intentional, nothing default
+**Distinctiveness** (1–5): Does this page have a clear visual point of view?
+1 = Generic template: multiple recognized AI-default patterns from the list above
+2 = Mostly generic: 1–2 patterns, no distinctive choices
+3 = Neutral: clean and functional but could be any site
+4 = Has character: clear visual decisions that distinguish it
+5 = Distinctive: intentional design voice, nothing default
 
 **Clarity** (1–5): Is the one main action obvious?
 1 = No clear action or too many competing actions
@@ -56,7 +56,7 @@ SCORING (at the end):
 4 = Action is prominent and clear
 5 = Action is unmissable and the page is built around it
 
-Explain each score in 2 sentences.
+Base scores on specific evidence (which patterns, which elements), not gut feeling.
 
 OUTPUT FORMAT:
 - Findings table: | Finding | Severity (Floor/Reflex/Finish) | Location | Fix |
@@ -65,10 +65,9 @@ OUTPUT FORMAT:
 - Accessibility issues count
 - Distinctiveness: X/5 — explanation
 - Clarity: X/5 — explanation
-- Verdict (one word): recapture | rebuild | fix | ship
+- Verdict (one word): rebuild | fix | ship
 
 Verdict meanings:
-- recapture: the page has a direction but needs re-rendering / screenshot after fixes
 - rebuild: the page has no direction — start the design phase over
 - fix: 1–5 specific issues to address, then ship
 - ship: ready to launch
@@ -81,6 +80,5 @@ Verdict meanings:
 1. If verdict is **ship**: phase is complete. Update state.
 2. If verdict is **fix**: apply each listed fix (one change per fix), then run a single confirming re-review.
 3. If verdict is **rebuild**: return to the Direction phase (Full mode) or ask the user for design references (Quick mode).
-4. If verdict is **recapture**: apply fixes, re-render screenshots, run one more review.
 
 Maximum review rounds: 2. If the second review still says "rebuild," stop and ask the user for explicit direction.

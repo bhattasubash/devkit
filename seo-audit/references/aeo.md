@@ -45,30 +45,37 @@ AI prioritizes sources it can trust and attribute.
 
 Manage in `robots.txt`. Decide per-crawler:
 
-| Crawler | Operator | Default |
-|---------|----------|---------|
-| `GPTBot` | OpenAI | Allow (recommended) |
-| `ChatGPT-User` | OpenAI (browsing) | Allow |
-| `ClaudeBot` | Anthropic | Allow (recommended) |
-| `PerplexityBot` | Perplexity | Allow (recommended) |
-| `Google-Extended` | Google AI | Allow (recommended) |
-| `CCBot` | Common Crawl | Your choice |
-| `Amazonbot` | Amazon/Alexa | Your choice |
+AI operators now run **separate bots** for training, search, and user browsing. Blocking a training bot does not block search citations. Allow/block decisions depend on the site owner's comfort — present the table, do not default.
+
+| Bot | Operator | Purpose | Notes |
+|-----|----------|---------|-------|
+| `GPTBot` | OpenAI | Training data | Blocking stops training but not search or browsing |
+| `OAI-SearchBot` | OpenAI | Search results (ChatGPT search) | Block = not cited in ChatGPT search |
+| `ChatGPT-User` | OpenAI | Live browsing by user request | Usually allow |
+| `ClaudeBot` | Anthropic | Training data | Does NOT affect Claude web search |
+| `ClaudeBot-SearchBot` | Anthropic | Search citations | Block = not cited in Claude search |
+| `PerplexityBot` | Perplexity | Search and training | Single bot for both |
+| `Googlebot` | Google | Search indexing | Do not block (breaks Google Search) |
+| `Google-Extended` | Google | AI training (Gemini) | Controls whether content trains Gemini models. This is NOT a separate crawler — it is a policy signal read by Googlebot |
+| `CCBot` | Common Crawl | Open dataset | Site owner's choice |
+| `Amazonbot` | Amazon | Alexa answers | Site owner's choice |
 
 ```
-# Example: allow all AI crawlers
+# Example: allow search bots, block training
+User-agent: OAI-SearchBot
+Allow: /
+
 User-agent: GPTBot
+Disallow: /
+
+User-agent: PerplexityBot
 Allow: /
 
-User-agent: ClaudeBot
-Allow: /
-
-# Example: block one
-User-agent: CCBot
+User-agent: Google-Extended
 Disallow: /
 ```
 
-**Gate**: Confirm crawler policy with the user before modifying `robots.txt`.
+**Gate**: Present the table to the user. **Never set defaults** — the user decides which bots to allow or block. Confirm before modifying `robots.txt`.
 
 ---
 

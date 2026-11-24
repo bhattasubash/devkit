@@ -10,11 +10,11 @@ description: >
 
 # Anti-Slop Design
 
-Hold a hard floor against the defaults every model falls into. Enforce design tokens, check every component state, and catch the 30+ visual tells that mark a page as AI-generated. No external dependencies required.
+Hold a hard floor against the defaults every model falls into. Enforce design tokens, check every component state, and catch the visual tells that mark a page as AI-generated. No external dependencies required.
 
-## The Floor (non-waivable)
+## The Floor (non-waivable rules — no exceptions)
 
-These bind every output. None can be overridden.
+These bind every output. None can be overridden, and none have "when it's acceptable" exceptions.
 
 1. Every color and font goes through a declared token (`:root` variable). No literal value past the token block.
 2. Never `transition: all`. Never animate `width`, `height`, `top`, or `left`. Use `transform` and `opacity`.
