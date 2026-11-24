@@ -52,7 +52,7 @@ Exit Codes:
   process.exit(0);
 }
 
-const SKIP_DIRS = new Set(['node_modules', '.git', '__pycache__', '.venv', 'venv', 'dist', 'build', '.next', '.nuxt']);
+const SKIP_DIRS = new Set(['node_modules', '.git', '__pycache__', '.venv', 'venv', 'dist', 'build', '.next', '.nuxt', 'evals', '.devkit']);
 const SKIP_EXTS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif', '.ico', '.svg', '.woff', '.woff2', '.ttf', '.otf', '.eot', '.mp4', '.mp3', '.zip', '.tar', '.gz', '.lock', '.lockb']);
 const MAX_FILE_SIZE = 512 * 1024; // 512 KB
 

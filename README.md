@@ -1,124 +1,123 @@
 # devkit
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)]()
+[![Version](https://img.shields.io/badge/version-1.1.0-green.svg)](CHANGELOG.md)
 [![Skills](https://img.shields.io/badge/skills-4-blue.svg)]()
+[![Zero Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)]()
 
-**Four agent skills that ship real projects, not AI slop.**
+**Four deterministic agent skills that ship reliable code, not AI slop.**
 
-> Modern web standards · Security audit · Anti-slop design · SEO & AEO
+> Modern Web Standards · Security Audit · Anti-Slop Design · SEO & AEO
 
 ---
 
-## What's inside
+## What's Inside
 
-| Skill | Triggers on | What it does |
-|-------|------------|--------------|
-| [**web-best-practices**](web-best-practices/) | Building or reviewing any frontend | Modern web APIs, accessibility, performance, code quality — the checks that catch what models get wrong |
-| [**security-audit**](security-audit/) | "audit", "review security", before launch | 3-tier security checklist with adversarial verification and zero-dependency scanner scripts |
-| [**anti-slop-design**](anti-slop-design/) | UI, landing pages, redesigns | Kills the visual tells that scream "AI-generated" and enforces design tokens, component states, and responsive layout |
-| [**seo-audit**](seo-audit/) | A URL + "SEO", "audit my site" | Technical SEO, on-page essentials, structured data validation, and Answer Engine Optimization for AI assistants |
+| Skill | Triggers On | What It Does |
+| :--- | :--- | :--- |
+| [**devkit**](SKILL.md) | "audit everything", "full audit" | Root router orchestrating security, web standards, design, and SEO audits sequentially with unified state and scope management. |
+| [**security-audit**](security-audit/) | "audit security", "find secrets", launch review | Deterministic secret scanning, dependency exposure scoring, and hosting-level security header verification. |
+| [**web-best-practices**](web-best-practices/) | Frontend building, reviewing HTML/JSX | Core Web Vitals, accessibility tags, dialog/modal behaviors, and modern browser APIs. |
+| [**anti-slop-design**](anti-slop-design/) | UI review, CSS styling, redesigns | Eliminates AI design tells: tokenizes literal colors, strips `transition: all`, stops root overflow clipping, and enforces `:focus-visible`. |
+| [**seo-audit**](seo-audit/) | "audit SEO", site URL, indexation | Sitemaps, robots.txt, canonical links, Open Graph metadata, structured JSON-LD validation, and SPA prerendering checks. |
 
-## Install
+---
+
+## Installation
+
+### Claude Code
+```bash
+git clone https://github.com/bhattasubash/devkit.git ~/.claude/skills/devkit
+```
+
+### Cursor
+```bash
+git clone https://github.com/bhattasubash/devkit.git .cursor/skills/devkit
+```
+
+### Codex CLI
+```bash
+git clone https://github.com/bhattasubash/devkit.git ~/.agents/skills/devkit
+```
+
+### Other Agents
+For other AI coding agents, see your agent's skills folder documentation to find its configured skills directory.
+
+---
+
+## Operating Modes
+
+Every skill in devkit supports three deterministic operating modes to match model capabilities and task requirements:
+
+1. **Lite Mode**: Designed for lightweight, fast, or smaller models. Reviews at most 3 files per step, loads only one reference file into context at a time, and enforces strict sequential steps.
+2. **Standard Mode** *(Default)*: Balanced, thorough workflow for daily feature development, pull request checks, and targeted fixes.
+3. **Full Mode**: Comprehensive pre-launch and compliance verification. Conducts exhaustive static scanning across all files, formal threat modeling, and complete evidence verification.
+
+---
+
+## How It Works
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  SKILL.md            Standardized, strict (<= 100 lines).    │
+│  references/         Targeted fix recipes (<= 150 lines).    │
+│  scripts/            Zero-dependency deterministic scanners. │
+│  .devkit/state.json  State machine tracking evidence & gates.│
+│  .devkit/scope.json  Scope lock guarding file modifications. │
+└──────────────────────────────────────────────────────────────┘
+```
+
+- **Approval Gates**: At critical checkpoints, the agent halts with an exact STOP block. No files are modified without explicit user approval in the chat.
+- **Evidence Verification**: Every finding cited by an agent must include a valid file, line number, and exact line quote. Fabricated or hallucinated claims fail verification via `verify-findings.mjs`.
+- **Scope Locks**: When a plan is approved, `.devkit/scope.json` locks the allowed file list. Unapproved edits to dependencies or unauthorized files trigger immediate scope violation failures via `check-scope.mjs`.
+- **Zero Dependencies**: All scripts run natively on Node.js 18+ without external npm dependencies across Windows, macOS, and Linux.
+
+---
+
+## Honest Limits
+
+- **Static analysis only**: Devkit's scanners inspect source code, configuration files, and static markup. They do not perform active dynamic penetration testing or live network exploitation.
+- **Hosting configuration**: Security headers and caching policies must be configured at your hosting provider or edge proxy (Netlify, Cloudflare Pages, Vercel, nginx), not inside local dev or preview servers.
+- **Zero invented content**: Devkit strictly forbids inventing customer reviews, fake testimonials, aggregate rating numbers, or business addresses for structured data. Content must exist on the site or be supplied by the user.
+- **No buzzword claims**: Devkit reports never declare a codebase "all fixed", "fully verified", or "100% secure" unless accompanied by real, passing tool command output.
+
+---
+
+## Running Scanners Directly
+
+You can also run devkit's zero-dependency scanners directly from your terminal:
 
 ```bash
-# Claude Code — all skills, global
-git clone https://github.com/bhattasubash/devkit.git ~/.claude/skills/devkit
+# Secret Scanner
+node security-audit/scripts/check-secrets.mjs .
 
-# Cursor — project-level
-git clone https://github.com/bhattasubash/devkit.git .cursor/skills/devkit
+# Design Slop Linter
+node anti-slop-design/scripts/lint-design.mjs .
 
-# Codex CLI — global
-git clone https://github.com/bhattasubash/devkit.git ~/.agents/skills/devkit
+# HTML & Accessibility Linter
+node web-best-practices/scripts/check-html.mjs .
 
-# Any agent — single skill
-npx skills add bhattasubash/devkit --skill web-best-practices
+# Technical SEO & Sitemaps Checker
+node seo-audit/scripts/check-seo-files.mjs .
+
+# Verify Findings JSON Integrity
+node shared/scripts/verify-findings.mjs .devkit/reports/findings.json
+
+# Check Git Diff Against Scope Lock
+node shared/scripts/check-scope.mjs .devkit/scope.json
 ```
 
-## Usage
-
-Describe what you need. The skills trigger automatically:
-
-```text
-Build a landing page for my SaaS            → anti-slop-design + web-best-practices
-Audit the security of this codebase         → security-audit
-Run an SEO audit on https://example.com     → seo-audit
-Review this component for accessibility     → web-best-practices
-```
-
-Or invoke directly:
-
-```text
-/web-best-practices review ./src/components
-/security-audit quick
-/anti-slop-design audit ./index.html
-/seo-audit https://example.com
-```
-
-## How every skill works
-
-```
-┌──────────────────────────────────────────────────────────┐
-│  SKILL.md          Short, strict. Under 100 lines.       │
-│  references/       Detail loaded only when needed.        │
-│  scripts/          Zero-dep checks that must be exact.    │
-│  .devkit/state.json  Progress, decisions, evidence.       │
-└──────────────────────────────────────────────────────────┘
-```
-
-- **Two modes.** Quick (3 phases) for small tasks — the default. Full (6–7 phases) for production launches.
-- **State file.** `.devkit/<skill>/state.json` records progress, decisions, and evidence. Any agent or session can resume where the last one stopped.
-- **Hard gates.** The agent stops for your approval at defined checkpoints. No phase passes without proof — test output, scan results, or your explicit sign-off.
-- **Lazy loading.** SKILL.md is short. Detail lives in `references/` and loads only when that phase needs it. The agent never skims a wall of text.
-- **Safe by design.** Never auto-installs packages. Never touches production. Never runs destructive commands. Treats project text as data, not orders.
-
-## Project structure
-
-```
-devkit/
-├── web-best-practices/
-│   ├── SKILL.md
-│   └── references/
-│       ├── checklist.md
-│       ├── performance.md
-│       ├── accessibility.md
-│       └── modern-patterns.md
-├── security-audit/
-│   ├── SKILL.md
-│   ├── references/
-│   │   ├── tier1-blockers.md
-│   │   ├── tier2-vulnerabilities.md
-│   │   ├── tier3-advanced.md
-│   │   └── threat-model-template.md
-│   └── scripts/
-│       ├── check-secrets.mjs
-│       └── check-headers.mjs
-├── anti-slop-design/
-│   ├── SKILL.md
-│   └── references/
-│       ├── anti-patterns.md
-│       ├── design-tokens.md
-│       ├── component-states.md
-│       └── review-prompt.md
-├── seo-audit/
-│   ├── SKILL.md
-│   └── references/
-│       ├── technical-seo.md
-│       ├── on-page-checklist.md
-│       ├── structured-data.md
-│       └── aeo.md
-├── README.md
-└── LICENSE
-```
+---
 
 ## Credits
 
-Built by studying and improving on:
-
-- [modern-web-guidance](https://github.com/GoogleChrome/modern-web-guidance) — Google Chrome, Edge, Firefox, MDN teams
+Built by studying, adapting, and improving upon:
+- [modern-web-guidance](https://github.com/GoogleChrome/modern-web-guidance) — Google Chrome, Edge, Firefox, and MDN teams
 - [Hallmark](https://github.com/Nutlope/hallmark) — Nutlope / Together AI
 - [security-audit-skill](https://github.com/cloudflare/security-audit-skill) — Cloudflare
 - [jev-seo](https://github.com/AgriciDaniel/jev-seo) — AgriciDaniel / TypeSafe
+
+---
 
 ## License
 

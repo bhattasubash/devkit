@@ -366,6 +366,8 @@ async function checkHtmlFile(filePath) {
   }
 }
 
+let htmlFileCount = 0;
+
 async function scanHtmlFiles(dir) {
   let entries;
   try {
@@ -377,21 +379,27 @@ async function scanHtmlFiles(dir) {
   for (const entry of entries) {
     const full = join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (!['node_modules', '.git', 'dist', 'build', '.next', '.devkit'].includes(entry.name)) {
+      if (!['node_modules', '.git', 'dist', 'build', '.next', '.devkit', 'evals'].includes(entry.name)) {
         await scanHtmlFiles(full);
       }
     } else if (entry.isFile()) {
       const ext = extname(entry.name).toLowerCase();
       if (['.html', '.htm'].includes(ext)) {
+        htmlFileCount++;
         await checkHtmlFile(full);
       }
     }
   }
 }
 
-await checkRobotsTxt();
-await checkSitemapXml();
 await scanHtmlFiles(targetDir);
+
+// Only check robots.txt and sitemap.xml if the target is a web application with HTML markup or has search assets
+const hasWebAssets = htmlFileCount > 0 || (await findFileInDirs('robots.txt', searchDirs)) || (await findFileInDirs('sitemap.xml', searchDirs));
+if (hasWebAssets) {
+  await checkRobotsTxt();
+  await checkSitemapXml();
+}
 
 const output = {
   scanned_dir: targetDir,

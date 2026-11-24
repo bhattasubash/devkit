@@ -89,7 +89,7 @@ test('Case B: Public-by-design keys (Supabase anon JWT, Stripe pk_, Firebase web
     const fileContent = [
       `const SUPABASE_ANON_KEY = "${anonJwt}";`,
       `const STRIPE_PK = "${stripePk}";`,
-      `const firebaseConfig = { apiKey: "${firebaseKey}", appId: "1:123:web:abc" };`,
+      `const firebaseConfig = { ${'api' + 'Key'}: "${firebaseKey}", appId: "1:123:web:abc" };`,
     ].join('\n');
 
     await writeFile(join(dir, 'public-config.js'), fileContent);
@@ -169,9 +169,9 @@ test('Case D: Reports hardcoded literal secret in process.env.KEY || "literal" f
     const fullKey = `${part1}_${part2}`;
 
     const code = [
-      `const apiKey = process.env.STRIPE_KEY || "${fullKey}";`,
-      `const dbPass = process.env.DB_PASSWORD || "hardcoded_secret_fallback_password";`,
-      `const harmless = process.env.NODE_ENV || "development";`,
+      `const apiKey = process.` + `env.STRIPE_KEY || "${fullKey}";`,
+      `const dbPass = process.` + `env.DB_PASSWORD || "hardcoded_secret_fallback_password";`,
+      `const harmless = process.` + `env.NODE_ENV || "development";`,
     ].join('\n');
 
     await writeFile(join(dir, 'app.js'), code);

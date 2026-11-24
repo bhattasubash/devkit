@@ -60,7 +60,7 @@ try {
   process.exit(2);
 }
 
-const SKIP_DIRS = new Set(['node_modules', '.git', 'dist', 'build', '.next', '.nuxt', '.devkit']);
+const SKIP_DIRS = new Set(['node_modules', '.git', 'dist', 'build', '.next', '.nuxt', '.devkit', 'evals']);
 const CSS_EXTS = new Set(['.css', '.scss', '.sass', '.less']);
 const MARKUP_EXTS = new Set(['.html', '.htm', '.jsx', '.tsx', '.vue', '.svelte']);
 
