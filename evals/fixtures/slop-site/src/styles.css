@@ -1,0 +1,23 @@
+/* Base styles */
+body {
+  overflow-x: hidden;
+  width: 100vw;
+}
+
+.card {
+  color: #ff0055;
+  transition: all 0.3s ease;
+}
+
+.custom-btn {
+  outline: none;
+}
+
+@keyframes pulse {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.spinner {
+  animation: pulse 1s infinite;
+}

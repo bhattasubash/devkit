@@ -1,0 +1,65 @@
+[
+  {
+    "id": "SLOP-001",
+    "file": "index.html",
+    "line": 10,
+    "severity": "high",
+    "pattern": "DIV_ONCLICK",
+    "quote": "<div onClick={() => alert('clicked')} class=\"custom-btn\">Click Me</div>",
+    "fix": "Replace <div onClick> with a native <button> element, or add role=\"button\" with tabIndex and keyboard handlers."
+  },
+  {
+    "id": "SLOP-002",
+    "file": "src/styles.css",
+    "line": 3,
+    "severity": "critical",
+    "pattern": "OVERFLOW_HIDDEN_ROOT",
+    "quote": "overflow-x: hidden;",
+    "fix": "Never use \"overflow: hidden\" or \"overflow-x: hidden\" on html or body. Use \"overflow-x: clip\" instead."
+  },
+  {
+    "id": "SLOP-003",
+    "file": "src/styles.css",
+    "line": 4,
+    "severity": "high",
+    "pattern": "WIDTH_100VW",
+    "quote": "width: 100vw",
+    "fix": "Avoid \"width: 100vw\" as it causes horizontal scrollbars on desktop with scrollbar gutters. Use \"width: 100%\" instead."
+  },
+  {
+    "id": "SLOP-004",
+    "file": "src/styles.css",
+    "line": 8,
+    "severity": "high",
+    "pattern": "LITERAL_COLOR",
+    "quote": "#ff0055",
+    "fix": "Replace literal color with a CSS variable token defined in :root (e.g. var(--color-brand-500))."
+  },
+  {
+    "id": "SLOP-005",
+    "file": "src/styles.css",
+    "line": 9,
+    "severity": "high",
+    "pattern": "TRANSITION_ALL",
+    "quote": "transition: all",
+    "fix": "Never transition \"all\". Specify explicit properties (e.g. \"transition: transform 150ms ease-out, opacity 150ms ease-out\")."
+  },
+  {
+    "id": "SLOP-006",
+    "file": "src/styles.css",
+    "line": 13,
+    "severity": "high",
+    "pattern": "OUTLINE_REMOVED",
+    "quote": "outline: none;",
+    "fix": "Never set \"outline: none\" or \"outline: 0\" without pairing it with an immediate, visible :focus-visible ring."
+  },
+  {
+    "id": "SLOP-007",
+    "file": "src/styles.css",
+    "line": 1,
+    "severity": "high",
+    "pattern": "MISSING_REDUCED_MOTION",
+    "quote": "@keyframes / animation",
+    "fix": "File defines CSS animation or @keyframes without @media (prefers-reduced-motion: reduce) override."
+  }
+]

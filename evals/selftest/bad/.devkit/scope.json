@@ -1,0 +1,10 @@
+{
+  "allowed_files": [
+    "server.js"
+  ],
+  "allow_dependency_changes": false,
+  "tampered_dependencies": true,
+  "unauthorized_files": [
+    "unauthorized-secret.key"
+  ]
+}

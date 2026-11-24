@@ -1,0 +1,6 @@
+{
+  "name": "vuln-app",
+  "version": "1.0.0",
+  "description": "Vulnerable test application for security audit eval",
+  "main": "server.js"
+}
