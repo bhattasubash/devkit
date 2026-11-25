@@ -171,13 +171,16 @@ node shared/scripts/check-scope.mjs .devkit/scope.json
 
 ---
 
-## Credits
+## Sources and Credits
 
-Built by studying, adapting, and improving upon:
-- [modern-web-guidance](https://github.com/GoogleChrome/modern-web-guidance) — Google Chrome, Edge, Firefox, and MDN teams
-- [Hallmark](https://github.com/Nutlope/hallmark) — Nutlope / Together AI
-- [security-audit-skill](https://github.com/cloudflare/security-audit-skill) — Cloudflare
-- [jev-seo](https://github.com/AgriciDaniel/jev-seo) — AgriciDaniel / TypeSafe
+Previously named in `README.md` (TODO: owner to confirm):
+- [modern-web-guidance](https://github.com/GoogleChrome/modern-web-guidance) — Google Chrome, Edge, Firefox, and MDN teams *(TODO: owner to confirm)*
+- [Hallmark](https://github.com/Nutlope/hallmark) — Nutlope / Together AI *(TODO: owner to confirm)*
+- [security-audit-skill](https://github.com/cloudflare/security-audit-skill) — Cloudflare *(TODO: owner to confirm)*
+- [jev-seo](https://github.com/AgriciDaniel/jev-seo) — AgriciDaniel / TypeSafe *(TODO: owner to confirm)*
+
+Design rules (`anti-slop-design/`) and security checklists (`security-audit/`):
+- TODO: owner to confirm exact sources for the design rules and security checklists.
 
 ---
 
