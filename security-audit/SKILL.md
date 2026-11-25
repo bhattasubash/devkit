@@ -19,22 +19,23 @@ Deliver concrete threat boundaries, source-verified evidence, and minimal effect
 - **Full**: Comprehensive threat model, Tier 1–3 audits, adversarial proof-of-concept tests, and verified fix suite.
 
 ## Procedure
-1. Initialize state: `node shared/scripts/devkit-state.mjs init --skill security-audit --mode <mode>`.
+1. Initialize state: `node security-audit/scripts/devkit-state.mjs init --skill security-audit --mode <mode>`.
 2. Run scanners: `node security-audit/scripts/check-secrets.mjs .` and `node security-audit/scripts/check-headers.mjs <url>`.
 3. Check rules: Load `references/tier1-blockers.md` (and Tier 2/3 if Full). For every finding, record exact file, line, and quote.
 4. Draft fix plan and write `.devkit/scope.json` containing `allowed_files` and `allow_dependency_changes: false`.
 5. Approval Gate:
    STOP. Reply 'approve' to continue, or tell me what to change. Do not continue until the user replies in this chat.
 6. Apply approved fixes, addressing one finding at a time.
-7. Verify scope: Run `node shared/scripts/check-scope.mjs .devkit/scope.json`.
-8. Verify evidence: Run `node shared/scripts/verify-findings.mjs .devkit/reports/findings.json`.
-9. Advance state: `node shared/scripts/devkit-state.mjs advance`.
+7. Verify scope: Run `node security-audit/scripts/check-scope.mjs .devkit/scope.json`.
+8. Verify evidence: Run `node security-audit/scripts/verify-findings.mjs .devkit/reports/findings.json`.
+9. Advance state: `node security-audit/scripts/devkit-state.mjs advance`.
 10. Generate final report at `.devkit/reports/security.md`.
+*Note*: If installed inside an agent skills folder (e.g. `.agents/skills/security-audit/`), prefix script paths with that parent skills folder.
 
 ## Evidence Rules
 - Every candidate finding must cite the exact `file:line` and an exact verbatim `quote` from that line.
-- `node shared/scripts/verify-findings.mjs .devkit/reports/findings.json` MUST exit 0 before reporting.
-- A vulnerability in a dev-only dependency that does not ship to users is never above Medium (see `shared/severity.md`).
+- `node security-audit/scripts/verify-findings.mjs .devkit/reports/findings.json` MUST exit 0 before reporting.
+- A vulnerability in a dev-only dependency that does not ship to users is never above Medium (Exposure × Impact 1–5 whole numbers; write `"unscored"` until fresh-context review).
 
 ## Scope Lock
 - At plan approval, write `.devkit/scope.json`. After fixes, `check-scope.mjs` must pass.

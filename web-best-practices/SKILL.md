@@ -19,21 +19,22 @@ Eliminate outdated legacy patterns, inaccessible controls, and layout stability 
 - **Full**: Deep-dive accessibility audit (keyboard/screen reader), Core Web Vitals tuning, and cross-browser tests.
 
 ## Procedure
-1. Initialize state: `node shared/scripts/devkit-state.mjs init --skill web-best-practices --mode <mode>`.
+1. Initialize state: `node web-best-practices/scripts/devkit-state.mjs init --skill web-best-practices --mode <mode>`.
 2. Run scanner: `node web-best-practices/scripts/check-html.mjs .`.
 3. Check rules: Load `references/checklist.md` and `references/modern-patterns.md`. Record file, line, and quote per finding.
 4. Draft fix plan and write `.devkit/scope.json` containing `allowed_files` and `allow_dependency_changes: false`.
 5. Approval Gate:
    STOP. Reply 'approve' to continue, or tell me what to change. Do not continue until the user replies in this chat.
 6. Apply approved fixes, updating one component or page at a time.
-7. Verify scope: Run `node shared/scripts/check-scope.mjs .devkit/scope.json`.
-8. Verify evidence: Run `node shared/scripts/verify-findings.mjs .devkit/reports/findings.json`.
-9. Advance state: `node shared/scripts/devkit-state.mjs advance`.
+7. Verify scope: Run `node web-best-practices/scripts/check-scope.mjs .devkit/scope.json`.
+8. Verify evidence: Run `node web-best-practices/scripts/verify-findings.mjs .devkit/reports/findings.json`.
+9. Advance state: `node web-best-practices/scripts/devkit-state.mjs advance`.
 10. Generate final report at `.devkit/reports/web.md`.
+*Note*: If installed inside an agent skills folder (e.g. `.agents/skills/web-best-practices/`), prefix script paths with that parent skills folder.
 
 ## Evidence Rules
 - Every candidate finding must cite the exact `file:line` and an exact verbatim `quote` from that line.
-- `node shared/scripts/verify-findings.mjs .devkit/reports/findings.json` MUST exit 0 before reporting.
+- `node web-best-practices/scripts/verify-findings.mjs .devkit/reports/findings.json` MUST exit 0 before reporting.
 - JSX/TSX findings from scanner are tagged `heuristic`; verify manually before marking as confirmed.
 
 ## Scope Lock

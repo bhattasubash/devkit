@@ -1,0 +1,36 @@
+name: Test and Self-Scan
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: ${{ matrix.os }} / Node ${{ matrix.node-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node-version: [18, 20, 22]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Print Node.js version
+        run: node --version
+
+      - name: Verify shared script sync
+        run: node scripts/sync-shared.mjs --check
+
+      - name: Run unit tests
+        run: node --test
+
+      - name: Run repo scanners and fail on any finding
+        run: node --input-type=module -e 'const { execFileSync } = await import(`node:child_process`); for (const script of [`security-audit/scripts/check-secrets.mjs`, `anti-slop-design/scripts/lint-design.mjs`, `web-best-practices/scripts/check-html.mjs`, `seo-audit/scripts/check-seo-files.mjs`]) { const out = execFileSync(process.execPath, [script, `.`], { encoding: `utf8` }); process.stdout.write(out); const data = JSON.parse(out); const count = Array.isArray(data.findings) ? data.findings.length : Number(data.total_findings ?? 0); if (count > 0 || (data.warnings?.length ?? 0) > 0) { console.error(`Scanner reported findings or warnings:`, script); process.exit(1); } }'

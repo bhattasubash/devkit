@@ -19,21 +19,22 @@ Ensure typography, color harmony, layout breathing room, and motions feel intent
 - **Full**: Visual identity inventory, 2 distinct directions in words, full `:root` token mapping, and fresh review.
 
 ## Procedure
-1. Initialize state: `node shared/scripts/devkit-state.mjs init --skill anti-slop-design --mode <mode>`.
+1. Initialize state: `node anti-slop-design/scripts/devkit-state.mjs init --skill anti-slop-design --mode <mode>`.
 2. Run scanner: `node anti-slop-design/scripts/lint-design.mjs .`.
 3. Check rules: Load `references/anti-patterns.md`, `references/design-tokens.md`, and `references/component-states.md`.
 4. Draft fix plan and write `.devkit/scope.json` containing `allowed_files` and `allow_dependency_changes: false`.
 5. Approval Gate:
    STOP. Reply 'approve' to continue, or tell me what to change. Do not continue until the user replies in this chat.
 6. Apply approved fixes, updating token values, component layouts, and interactive states.
-7. Verify scope: Run `node shared/scripts/check-scope.mjs .devkit/scope.json`.
-8. Verify evidence: Run `node shared/scripts/verify-findings.mjs .devkit/reports/findings.json`.
-9. Advance state: `node shared/scripts/devkit-state.mjs advance`.
+7. Verify scope: Run `node anti-slop-design/scripts/check-scope.mjs .devkit/scope.json`.
+8. Verify evidence: Run `node anti-slop-design/scripts/verify-findings.mjs .devkit/reports/findings.json`.
+9. Advance state: `node anti-slop-design/scripts/devkit-state.mjs advance`.
 10. Generate final report at `.devkit/reports/design.md`.
+*Note*: If installed inside an agent skills folder (e.g. `.agents/skills/anti-slop-design/`), prefix script paths with that parent skills folder.
 
 ## Evidence Rules
 - Every candidate finding must cite the exact `file:line` and an exact verbatim `quote` from that line.
-- `node shared/scripts/verify-findings.mjs .devkit/reports/findings.json` MUST exit 0 before reporting.
+- `node anti-slop-design/scripts/verify-findings.mjs .devkit/reports/findings.json` MUST exit 0 before reporting.
 - Distinctiveness scores (1–5) may ONLY be assigned by an independent, fresh-context reviewer; otherwise write "unscored".
 
 ## Scope Lock

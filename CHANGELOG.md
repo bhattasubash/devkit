@@ -5,13 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.1.1] - 2026-11-25
 
 ### Added
-- **Production Telemetry & Receipts in README**: Documented concrete before/after receipts, Mermaid architecture comparisons, and empirical metrics across 7 real-world testbed codebases (Next.js 16 SaaS, Kubernetes operator, Fintech core, FastAPI backend, Convex fullstack, and Vite frontend).
-- **Line-Drift Tolerance in `verify-findings.mjs`**: Supports a $\pm 3$ line tolerance window to accommodate minor offset shifts from newly added imports or comments without breaking verification, while preserving strict quote assertions.
-- **Diagnostic Hints (`suggested_line`)**: When an agent cites a line out of tolerance (e.g. line 119 vs 107), `verify-findings.mjs` scans the file and returns the exact `suggested_line` in its failure payload to eliminate trial-and-error agent turns.
+- **Launch Audit ([`docs/LAUNCH-AUDIT.md`](docs/LAUNCH-AUDIT.md))**: Reproduced and cataloged unverified claims, missing npm publication, isolated skill path failures, and missing repository hygiene files.
+- **Line-Drift Tolerance in `verify-findings.mjs`**: Supports a $\pm 3$ line tolerance window to accommodate minor offset shifts without breaking verification, while preserving quote assertions.
+- **Diagnostic Hints (`suggested_line`)**: When a cited quote falls outside the tolerance window, `verify-findings.mjs` scans the file and returns `suggested_line` in its failure payload.
 - **Ephemeral Test Artifact Filtering in `check-scope.mjs`**: Automatically ignores runtime test side-effects (`.pytest_cache`, `__pycache__`, `*.db-journal`, `*.sqlite-journal`, `*.tmp`, `coverage`) and adds support for custom `ignored_files` / `ignore_patterns` in `scope.json`.
+
+### Changed
+- **Honest Status & Verified Install Instructions in `README.md`**: Replaced unbacked benchmark claims with a `Status and Limits` section documenting `49` passing unit tests (`node --test`), pattern/regex scanner behavior (`heuristic` mode for JSX/TSX), zero CLI network calls, unmeasured status in `evals/README.md`, and locally verified `node ./devkit/bin/devkit.mjs init` usage.
+- **Clarified Historical `[1.1.0]` Claims (without rewriting `[1.1.0]` history)**: `@bhattasubash/devkit` is not published on npm yet, scanners use regex/line matching rather than full deterministic or AST parsing, and the `evals/README.md` matrix currently contains `"not measured yet"` across all entries.
+
+### Removed
+- Removed unsupported benchmark claims, unverified metrics and test counts, unbacked repository receipts and project names, `"AST"` validation claims, unverified timing claims, unverified results-reporting labels, and unpublished npm `npx` install commands from `README.md` and unreleased changelog notes.
 
 ## [1.1.0] - 2026-11-24
 
