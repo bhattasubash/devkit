@@ -26,9 +26,9 @@
 ## Status and Limits
 
 ### What Exists Today
-- **4 domain skills + 1 root router:** [`security-audit`](security-audit/), [`web-best-practices`](web-best-practices/), [`anti-slop-design`](anti-slop-design/), [`seo-audit`](seo-audit/), and [`SKILL.md`](SKILL.md), supported by shared scripts in [`shared/scripts/`](shared/scripts/) and a CLI installer in [`bin/devkit.mjs`](bin/devkit.mjs).
+- **4 self-contained domain skills + 1 root router:** [`security-audit`](security-audit/), [`web-best-practices`](web-best-practices/), [`anti-slop-design`](anti-slop-design/), [`seo-audit`](seo-audit/), and [`SKILL.md`](SKILL.md), with shared source scripts in [`shared/scripts/`](shared/scripts/) synced into each skill's `scripts/` folder via [`scripts/sync-shared.mjs`](scripts/sync-shared.mjs) and a CLI installer in [`bin/devkit.mjs`](bin/devkit.mjs).
 - **Zero npm dependencies:** `package.json` declares no `dependencies` or `devDependencies` and targets Node.js `>=18.0.0`.
-- **Unit test suite:** `49` passing tests (`49 pass`, `0 fail`, `0 skipped`) via `node --test`, verified locally on Windows with Node `v24.11.1`.
+- **Unit test suite:** `58` passing tests (`58 pass`, `0 fail`, `0 skipped`) via `node --test`, verified locally on Windows with Node `v24.11.1`.
 - **License:** [MIT](LICENSE).
 - **No CLI network calls:** The CLI makes no network calls. All local scanners operate offline; only [`check-headers.mjs`](security-audit/scripts/check-headers.mjs) makes outbound HTTP `HEAD`/`GET` `fetch()` requests to the `<url>` you pass to it.
 
@@ -41,7 +41,7 @@
 ### What Is Not Measured or Verified Yet
 - **Model and small-model pass rates:** Not measured yet. All 20 benchmark entries (5 models × 4 fixtures) in [`evals/README.md`](evals/README.md) are `not measured yet`. See [`evals/`](evals/) for fixtures, prompts, and the automated grader (`evals/grade.mjs`).
 - **Cross-platform and Node matrix:** Tested on Windows with Node `v24.11.1`. macOS, Linux, and Node 18 / 20 / 22 have not been tested yet.
-- **Standalone single-skill installs:** Each skill's `SKILL.md` currently references `shared/scripts/...` and therefore requires the full `devkit` repository layout.
+- **Live agent discovery:** Standalone single-skill and full-repo scripts pass automated tests in isolated temp directories, but live skill loading inside Cursor, Claude Code, Codex, Gemini, or Windsurf is untested.
 - **Static analysis only:** Scanners inspect source files, configs, and static markup. They do not run dynamic penetration tests or browser/runtime profiling.
 - **Hosting configuration:** Security headers and caching rules must be configured on your hosting provider or edge proxy (Netlify, Cloudflare Pages, Vercel, nginx), not in local preview servers.
 - **Zero invented content:** Agents are instructed never to fabricate customer reviews, testimonials, ratings, or business addresses, and never to declare `"all fixed"` or `"fully verified"` without command output.
@@ -50,21 +50,24 @@
 
 ## Installation
 
-> **Note:** `@bhattasubash/devkit` is not published to npm yet, so `npx @bhattasubash/devkit init` is unavailable today.
+### Main Install Command (Works Today)
 
-### Local Repository CLI (Verified)
-
-Clone the repository and run the CLI directly with Node.js 18+:
+Install directly from GitHub using `npx` (requires Node.js `>=18.0.0`):
 
 ```bash
-# Clone the repository (remote GitHub clone untested offline; tested with local clone)
-git clone https://github.com/bhattasubash/devkit.git
-
-# Preview scaffolding without writing files
-node ./devkit/bin/devkit.mjs init --dry-run
+# Preview scaffolding without writing files (verified offline via local git+file:// equivalent; remote GitHub fetch untested offline)
+npx github:bhattasubash/devkit init --dry-run
 
 # Auto-detect agent folders (.cursor, .claude, .codex, .agents, .gemini, .windsurf)
 # Defaults to .agents/skills/devkit if none are found, and initializes .devkit/
+npx github:bhattasubash/devkit init
+```
+
+Or clone and run the CLI directly with Node.js (verified end-to-end on a local clone):
+
+```bash
+git clone https://github.com/bhattasubash/devkit.git
+node ./devkit/bin/devkit.mjs init --dry-run
 node ./devkit/bin/devkit.mjs init
 ```
 
@@ -83,9 +86,33 @@ node ./devkit/bin/devkit.mjs --version
 node ./devkit/bin/devkit.mjs --help
 ```
 
-Untested install options (not yet verified):
-- `node ./devkit/bin/devkit.mjs init --global` (global install into user home directories) — **untested**.
-- Live host agent discovery when cloning directly into `.cursor/skills/devkit`, `~/.claude/skills/devkit`, or `~/.agents/skills/devkit` — **untested**.
+### Installing Individual Skills (`skills` CLI)
+
+Each skill (`security-audit`, `web-best-practices`, `anti-slop-design`, `seo-audit`) bundles its own `scripts/` copy and works standalone without `shared/`:
+
+```bash
+# Install a single skill (untested offline; requires the external skills CLI)
+npx skills add bhattasubash/devkit --skill security-audit
+npx skills add bhattasubash/devkit --skill web-best-practices
+npx skills add bhattasubash/devkit --skill anti-slop-design
+npx skills add bhattasubash/devkit --skill seo-audit
+```
+
+> **Note:** `npx skills add bhattasubash/devkit --list` shows only the root `devkit` skill because `SKILL.md` is at the repository root. Pass `--skill <name>` to install an individual sub-skill. (`npx skills` commands above are untested offline.)
+
+### After Publishing to npm (Not Available Yet)
+
+> **Status:** `@bhattasubash/devkit` is not published on npm yet (`npm view @bhattasubash/devkit` returns `E404`). Do not use this command until after publishing to npm:
+
+```bash
+npx @bhattasubash/devkit init
+```
+
+Untested install options:
+- `npx github:bhattasubash/devkit init` live remote GitHub resolution (only the local `git+file://` equivalent was tested offline).
+- `npx skills add bhattasubash/devkit --skill <name>` and `--list`.
+- `node ./devkit/bin/devkit.mjs init --global` (global install into user home directories).
+- Live host agent discovery when installed into `.cursor`, `.claude`, `.codex`, or `.agents`.
 
 ---
 
