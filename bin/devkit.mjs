@@ -69,6 +69,13 @@ const SKILL_PAYLOAD = [
   'CHANGELOG.md',
 ];
 
+const STANDALONE_SUBSKILLS = [
+  'security-audit',
+  'web-best-practices',
+  'anti-slop-design',
+  'seo-audit',
+];
+
 function printBanner(version) {
   console.log(`
 ${c.cyan}${c.bold}   ____            _    _ _   ${c.reset}
@@ -96,6 +103,7 @@ ${c.bold}OPTIONS${c.reset}
   ${c.cyan}--agent <list>${c.reset}     Target specific agents (e.g. cursor,claude,codex,agents,all)
   ${c.cyan}--global, -g${c.reset}       Install globally to user home directory (~/.cursor, ~/.claude)
   ${c.cyan}--force, -f${c.reset}        Overwrite existing installed skill directories
+  ${c.cyan}--no-flat${c.reset}          Skip sibling standalone sub-skill folders (only install devkit/)
   ${c.cyan}--dry-run${c.reset}          Simulate actions without writing any files to disk
   ${c.cyan}--cwd <path>${c.reset}       Target directory (defaults to current working directory)
   ${c.cyan}--silent, -s${c.reset}      Suppress banner and non-essential logs
@@ -118,6 +126,7 @@ function parseCliArgs(args) {
     agent: null,
     global: false,
     force: false,
+    flat: true,
     dryRun: false,
     cwd: process.cwd(),
     silent: false,
@@ -135,6 +144,8 @@ function parseCliArgs(args) {
       options.global = true;
     } else if (arg === '--force' || arg === '-f') {
       options.force = true;
+    } else if (arg === '--no-flat') {
+      options.flat = false;
     } else if (arg === '--dry-run') {
       options.dryRun = true;
     } else if (arg === '--silent' || arg === '-s') {
@@ -342,6 +353,20 @@ async function runInit(options) {
       skippedTargets.push(relDisplay);
     } else {
       scaffoldedTargets.push(relDisplay);
+    }
+
+    if (options.flat) {
+      const skillsParent = dirname(targetSkillPath);
+      for (const subSkill of STANDALONE_SUBSKILLS) {
+        const srcSub = join(PACKAGE_ROOT, subSkill);
+        const destSub = join(skillsParent, subSkill);
+        if (!existsSync(srcSub)) continue;
+        if (existsSync(destSub) && !options.force) continue;
+        if (!options.dryRun) {
+          await mkdir(destSub, { recursive: true });
+          await cp(srcSub, destSub, { recursive: true, force: true });
+        }
+      }
     }
   }
 

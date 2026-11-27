@@ -19,17 +19,17 @@ Eliminate outdated legacy patterns, inaccessible controls, and layout stability 
 - **Full**: Deep-dive accessibility audit (keyboard/screen reader), Core Web Vitals tuning, and cross-browser tests.
 
 ## Procedure
-1. Initialize state: `node web-best-practices/scripts/devkit-state.mjs init --skill web-best-practices --mode <mode>`.
-2. Run scanner: `node web-best-practices/scripts/check-html.mjs .`.
+1. Initialize state: `node web-best-practices/scripts/devkit-state.mjs init --skill web-best-practices --mode <mode>` (record inventory via `devkit-state.mjs record --evidence "<pages>"` and `advance`).
+2. Run scanner: `node web-best-practices/scripts/check-html.mjs .` and record scan evidence before `advance`.
 3. Check rules: Load `references/checklist.md` and `references/modern-patterns.md`. Record file, line, and quote per finding.
-4. Draft fix plan and write `.devkit/scope.json` containing `allowed_files` and `allow_dependency_changes: false`.
+4. Draft fix plan, write `.devkit/scope.json` (`allowed_files`, `allow_dependency_changes: false`), and run `devkit-state.mjs record --evidence "<plan>"`.
 5. Approval Gate:
    STOP. Reply 'approve' to continue, or tell me what to change. Do not continue until the user replies in this chat.
-6. Apply approved fixes, updating one component or page at a time.
+6. After approval, run `node web-best-practices/scripts/devkit-state.mjs approve --phase plan` and `advance`. Apply fixes, then record & `advance`.
 7. Verify scope: Run `node web-best-practices/scripts/check-scope.mjs .devkit/scope.json`.
 8. Verify evidence: Run `node web-best-practices/scripts/verify-findings.mjs .devkit/reports/findings.json`.
-9. Advance state: `node web-best-practices/scripts/devkit-state.mjs advance`.
-10. Generate final report at `.devkit/reports/web.md`.
+9. Record verification and advance state: `node web-best-practices/scripts/devkit-state.mjs record --evidence "<checks>"` then `advance`.
+10. Generate final report at `.devkit/reports/web.md`, record evidence, and `advance` to complete.
 *Note*: If installed inside an agent skills folder (e.g. `.agents/skills/web-best-practices/`), prefix script paths with that parent skills folder.
 
 ## Evidence Rules

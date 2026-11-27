@@ -19,17 +19,17 @@ Deliver concrete threat boundaries, source-verified evidence, and minimal effect
 - **Full**: Comprehensive threat model, Tier 1–3 audits, adversarial proof-of-concept tests, and verified fix suite.
 
 ## Procedure
-1. Initialize state: `node security-audit/scripts/devkit-state.mjs init --skill security-audit --mode <mode>`.
-2. Run scanners: `node security-audit/scripts/check-secrets.mjs .` and `node security-audit/scripts/check-headers.mjs <url>`.
+1. Initialize state: `node security-audit/scripts/devkit-state.mjs init --skill security-audit --mode <mode>` (record inventory via `devkit-state.mjs record --evidence "<entrypoints>"` and `advance`).
+2. Run scanners: `node security-audit/scripts/check-secrets.mjs .`, `node security-audit/scripts/check-code-vulns.mjs .`, and `node security-audit/scripts/check-headers.mjs <url>`. Record scan evidence and `advance`.
 3. Check rules: Load `references/tier1-blockers.md` (and Tier 2/3 if Full). For every finding, record exact file, line, and quote.
-4. Draft fix plan and write `.devkit/scope.json` containing `allowed_files` and `allow_dependency_changes: false`.
+4. Draft fix plan, write `.devkit/scope.json` (`allowed_files`, `allow_dependency_changes: false`), and run `devkit-state.mjs record --evidence "<plan>"`.
 5. Approval Gate:
    STOP. Reply 'approve' to continue, or tell me what to change. Do not continue until the user replies in this chat.
-6. Apply approved fixes, addressing one finding at a time.
+6. After approval, run `node security-audit/scripts/devkit-state.mjs approve --phase plan` and `advance`. Apply fixes one finding at a time, then record & `advance`.
 7. Verify scope: Run `node security-audit/scripts/check-scope.mjs .devkit/scope.json`.
 8. Verify evidence: Run `node security-audit/scripts/verify-findings.mjs .devkit/reports/findings.json`.
-9. Advance state: `node security-audit/scripts/devkit-state.mjs advance`.
-10. Generate final report at `.devkit/reports/security.md`.
+9. Record verification and advance state: `node security-audit/scripts/devkit-state.mjs record --evidence "<checks>"` then `advance`.
+10. Generate final report at `.devkit/reports/security.md`, record evidence, and `advance` to complete.
 *Note*: If installed inside an agent skills folder (e.g. `.agents/skills/security-audit/`), prefix script paths with that parent skills folder.
 
 ## Evidence Rules

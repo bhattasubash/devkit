@@ -19,17 +19,17 @@ Deliver verified metadata, valid XML sitemaps, and honest crawlability diagnosti
 - **Full**: Full crawl analysis, answer-first extraction structure, E-E-A-T evaluation, and AI crawler access policies.
 
 ## Procedure
-1. Initialize state: `node seo-audit/scripts/devkit-state.mjs init --skill seo-audit --mode <mode>`.
-2. Run scanner: `node seo-audit/scripts/check-seo-files.mjs .`.
+1. Initialize state: `node seo-audit/scripts/devkit-state.mjs init --skill seo-audit --mode <mode>` (record inventory via `devkit-state.mjs record --evidence "<routes>"` and `advance`).
+2. Run scanner: `node seo-audit/scripts/check-seo-files.mjs .` and record scan evidence before `advance`.
 3. Check rules: Load `references/technical-seo.md`, `references/structured-data.md`, and `references/aeo.md`.
-4. Draft fix plan and write `.devkit/scope.json` containing `allowed_files` and `allow_dependency_changes: false`.
+4. Draft fix plan, write `.devkit/scope.json` (`allowed_files`, `allow_dependency_changes: false`), and run `devkit-state.mjs record --evidence "<plan>"`.
 5. Approval Gate:
    STOP. Reply 'approve' to continue, or tell me what to change. Do not continue until the user replies in this chat.
-6. Apply approved fixes, updating sitemaps, metadata, structured data, or crawl policies.
+6. After approval, run `node seo-audit/scripts/devkit-state.mjs approve --phase plan` and `advance`. Apply fixes, then record & `advance`.
 7. Verify scope: Run `node seo-audit/scripts/check-scope.mjs .devkit/scope.json`.
 8. Verify evidence: Run `node seo-audit/scripts/verify-findings.mjs .devkit/reports/findings.json`.
-9. Advance state: `node seo-audit/scripts/devkit-state.mjs advance`.
-10. Generate final report at `.devkit/reports/seo.md`.
+9. Record verification and advance state: `node seo-audit/scripts/devkit-state.mjs record --evidence "<checks>"` then `advance`.
+10. Generate final report at `.devkit/reports/seo.md`, record evidence, and `advance` to complete.
 *Note*: If installed inside an agent skills folder (e.g. `.agents/skills/seo-audit/`), prefix script paths with that parent skills folder.
 
 ## Evidence Rules

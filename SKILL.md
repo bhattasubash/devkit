@@ -20,18 +20,19 @@ Run all four domain skills sequentially under a shared state, one combined repor
 
 ## Procedure
 1. Initialize shared state: `node shared/scripts/devkit-state.mjs init --skill devkit --mode <mode> --phases security,web,design,seo,plan,fix,verify,report`.
-2. Run Domain 1 (Security): `node security-audit/scripts/check-secrets.mjs .` and `node security-audit/scripts/check-headers.mjs <url>`. Record evidence and advance.
-3. Run Domain 2 (Web Standards): `node web-best-practices/scripts/check-html.mjs .`. Record evidence and advance.
-4. Run Domain 3 (Design Slop): `node anti-slop-design/scripts/lint-design.mjs .`. Record evidence and advance.
-5. Run Domain 4 (SEO & AEO): `node seo-audit/scripts/check-seo-files.mjs .`. Record evidence and advance.
-6. Synthesize all findings into `.devkit/reports/findings.json` and draft fix plan in `.devkit/scope.json`.
+2. Run Domain 1 (Security): `node security-audit/scripts/check-secrets.mjs .`, `node security-audit/scripts/check-code-vulns.mjs .`, and `node security-audit/scripts/check-headers.mjs <url>`. Record with `devkit-state.mjs record --evidence "<summary>"` and `advance`.
+3. Run Domain 2 (Web Standards): `node web-best-practices/scripts/check-html.mjs .`. Record evidence and `advance`.
+4. Run Domain 3 (Design Slop): `node anti-slop-design/scripts/lint-design.mjs .`. Record evidence and `advance`.
+5. Run Domain 4 (SEO & AEO): `node seo-audit/scripts/check-seo-files.mjs .`. Record evidence and `advance`.
+6. Synthesize all findings into `.devkit/reports/findings.json`, draft fix plan in `.devkit/scope.json`, and record plan evidence.
 7. Unified Plan Approval Gate:
    STOP. Reply 'approve' to continue, or tell me what to change. Do not continue until the user replies in this chat.
-8. Apply approved fixes in domain-isolated batches (security fixes first, then web, design, and SEO).
-9. Verify scope and evidence:
+8. After approval, run `node shared/scripts/devkit-state.mjs approve --phase plan` and `advance`. Apply fixes in domain-isolated batches (security first, then web, design, SEO).
+9. Verify scope and evidence, then record & advance:
    - `node shared/scripts/check-scope.mjs .devkit/scope.json`
    - `node shared/scripts/verify-findings.mjs .devkit/reports/findings.json`
-10. Generate combined report at `.devkit/reports/audit.md` and finalize state.
+10. Generate combined report at `.devkit/reports/audit.md`, record evidence, and `advance` to complete.
+*Note*: If installed inside an agent skills folder (e.g. `.agents/skills/devkit/` or `.cursor/skills/devkit/`), prefix script paths with that installed folder.
 
 ## Evidence Rules
 - Every finding from every domain must cite exact `file:line` and an exact verbatim `quote`.
