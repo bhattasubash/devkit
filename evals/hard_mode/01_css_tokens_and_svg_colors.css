@@ -1,0 +1,58 @@
+/* 01_css_tokens_and_svg_colors.css — Clean CSS tokens + scoped transitions + overflow-x: clip */
+:root {
+  --color-bg: #f8fafc;
+  --color-surface: #ffffff;
+  --color-text: #0f172a;
+  --color-accent: rgba(15, 118, 110, 0.92);
+  --duration-fast: 150ms;
+  --ease-standard: ease;
+}
+
+@theme {
+  --color-brand-500: #0f766e;
+  --color-brand-600: #115e59;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #0b0d10;
+    --color-surface: #141820;
+    --color-text: #f1f5f9;
+  }
+}
+
+html,
+body {
+  overflow-x: clip;
+  width: 100%;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+
+.action-button {
+  background-color: var(--color-brand-500);
+  color: var(--color-surface);
+  transition: opacity var(--duration-fast) var(--ease-standard), transform var(--duration-fast) var(--ease-standard);
+}
+
+.action-button:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn var(--duration-fast) var(--ease-standard);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .action-button,
+  .fade-in {
+    transition: none;
+    animation: none;
+  }
+}

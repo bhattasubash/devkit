@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Accessible Modal &amp; Search Controls — Docs</title>
+  <meta name="description" content="Demonstration of WCAG-compliant decorative images, accessible icon buttons, and aria-labelledby search controls.">
+</head>
+<body>
+  <main>
+    <h1>Accessible Component Controls</h1>
+    <img src="wave.svg" alt="" aria-hidden="true" width="1440" height="80">
+
+    <section aria-labelledby="search-lbl">
+      <span id="search-lbl">Search documentation</span>
+      <input id="q" name="q" type="search" aria-labelledby="search-lbl">
+      <button type="button" aria-label="Close modal">
+        <svg width="16" height="16" aria-hidden="true" viewBox="0 0 16 16">
+          <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" />
+        </svg>
+      </button>
+    </section>
+  </main>
+</body>
+</html>

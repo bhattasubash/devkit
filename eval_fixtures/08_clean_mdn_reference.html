@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; object-src 'none'">
+  <title>Fetch API Request Headers — Web Platform Reference</title>
+  <meta name="description" content="Technical reference covering CORS-safelisted request headers, preflight OPTIONS checks, and AbortController timeouts in browsers.">
+  <link rel="canonical" href="https://webref.example.org/docs/Web/API/Fetch_API">
+  <meta property="og:title" content="Fetch API Request Headers — Web Platform Reference">
+  <meta property="og:description" content="Reference for CORS-safelisted headers, preflight checks, and AbortController timeouts.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What triggers a CORS preflight OPTIONS request?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Non-simple HTTP methods such as PUT or DELETE, or custom headers outside the CORS-safelisted set, trigger a preflight check."
+        }
+      }
+    ]
+  }
+  </script>
+  <style>
+    :root {
+      --color-bg: #ffffff;
+      --color-text: #1b1b1b;
+      --color-link: #005ea2;
+      --color-border: #d1d5db;
+      --font-body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      margin: 0;
+      font-family: var(--font-body);
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.65;
+    }
+    .skip-link:focus-visible, a:focus-visible, input:focus-visible {
+      outline: 3px solid var(--color-link);
+      outline-offset: 2px;
+    }
+    main { max-width: 820px; margin: 0 auto; padding: 24px; }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <header>
+    <nav aria-label="Reference breadcrumb">
+      <a href="/docs/Web">Web Technology</a>
+      <a href="/docs/Web/API">Web APIs</a>
+    </nav>
+  </header>
+  <main id="main-content">
+    <article>
+      <h1>Using the Fetch API Safely</h1>
+      <p>The <code>fetch()</code> function returns a Promise that resolves to a <code>Response</code> once HTTP headers arrive from the server.</p>
+      <h2>What triggers a CORS preflight OPTIONS request?</h2>
+      <p>Requests using HTTP methods beyond GET, HEAD, or POST, or setting custom headers like <code>Authorization</code>, send an <code>OPTIONS</code> preflight request first.</p>
+      <h2>How do I cancel an in-flight request with AbortController?</h2>
+      <p>Pass <code>signal: controller.signal</code> into the <code>fetch()</code> options object and call <code>controller.abort()</code> when the timeout expires.</p>
+      <img src="/assets/preflight-sequence.svg" alt="Sequence diagram showing browser OPTIONS preflight followed by main GET request" width="680" height="300">
+    </article>
+    <section aria-labelledby="search-label">
+      <h2 id="search-label">Search Reference Topics</h2>
+      <form action="https://webref.example.org/search" method="GET">
+        <label for="ref-query">Filter API symbol</label>
+        <input id="ref-query" name="q" type="search">
+        <button type="submit">Filter</button>
+      </form>
+    </section>
+  </main>
+  <footer>
+    <p>Maintained by Web Platform Contributors.</p>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,6 @@
+{
+  "allowed_files": [
+    "styles.css"
+  ],
+  "allow_dependency_changes": false
+}

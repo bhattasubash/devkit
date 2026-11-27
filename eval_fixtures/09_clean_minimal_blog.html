@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; object-src 'none'">
+  <title>Measuring Tail Latency in SQLite WAL Mode</title>
+  <meta name="description" content="Field notes on checkpoint intervals, busy_timeout tuning, and p99 write latency across single-node SQLite services.">
+  <link rel="canonical" href="https://notes.example.org/sqlite-wal-latency">
+  <meta property="og:title" content="Measuring Tail Latency in SQLite WAL Mode">
+  <meta property="og:description" content="Field notes on checkpoint intervals and p99 write latency in SQLite WAL mode.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Measuring Tail Latency in SQLite WAL Mode",
+    "author": { "@type": "Person", "name": "Arjun Patel" },
+    "datePublished": "2026-09-18",
+    "image": "https://notes.example.org/images/wal-p99-chart.png"
+  }
+  </script>
+  <style>
+    :root {
+      --color-paper: #faf8f5;
+      --color-ink: #1c1917;
+      --color-rule: #d6d3d1;
+      --font-serif: Georgia, 'Times New Roman', serif;
+      --font-sans: system-ui, -apple-system, sans-serif;
+    }
+    body {
+      margin: 0;
+      background-color: var(--color-paper);
+      color: var(--color-ink);
+      font-family: var(--font-serif);
+      line-height: 1.7;
+    }
+    header, main, footer {
+      max-width: 68ch;
+      margin: 0 auto;
+      padding: 24px 20px;
+    }
+    h1, h2 { font-family: var(--font-sans); line-height: 1.25; }
+    a:focus-visible { outline: 2px solid var(--color-ink); outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav aria-label="Blog navigation">
+      <a href="/">All Notes</a>
+      <a href="/about">About</a>
+    </nav>
+  </header>
+  <main>
+    <article>
+      <h1>Measuring Tail Latency in SQLite WAL Mode</h1>
+      <p>By Arjun Patel · Published September 18, 2026</p>
+      <p>Write-ahead logging removes reader-writer lock contention, yet automatic checkpoints every 1,000 pages still create periodic p99 spikes.</p>
+      <img src="/images/wal-p99-chart.png" alt="Line chart comparing p99 write latency with default 1000-page checkpoints versus background passive checkpoints" width="720" height="360">
+      <h2>Why does wal_autocheckpoint cause p99 write spikes?</h2>
+      <p>The unlucky writer thread that crosses the 1,000-page threshold must flush dirty frames into the main database file before committing.</p>
+    </article>
+  </main>
+  <footer>
+    <p>Engineering Notes Archive</p>
+  </footer>
+</body>
+</html>
