@@ -53,7 +53,7 @@
       "name": "report",
       "status": "pending",
       "evidence": null,
-      "gate_type": "approval",
+      "gate_type": "none",
       "approved_by_user": false,
       "completed_at": null
     }

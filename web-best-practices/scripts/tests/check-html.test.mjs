@@ -122,3 +122,29 @@ test('Flags missing title, short meta description, missing viewport, multiple h1
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test('Flags missing semantic landmarks on div-soup, zoom-disabled viewport, and unlabeled select/textarea', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'landmarks-html-'));
+  try {
+    const doc = `<!DOCTYPE html><html lang="en"><head>
+      <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+      <title>Div Soup Demo Page</title>
+      <meta name="description" content="Testing missing semantic landmarks, disabled zoom viewport, and unlabeled select or textarea controls.">
+    </head><body>
+      <div class="wrap"><div class="inner"><h1>Heading</h1>
+      <select name="plan"><option>Basic</option></select>
+      <textarea name="notes"></textarea>
+      </div></div>
+    </body></html>`;
+    await writeFile(join(dir, 'index.html'), doc);
+
+    const res = runHtmlChecker(dir);
+    assert.equal(res.exitCode, 1);
+    const rules = new Set(res.data.findings.map((f) => f.rule));
+    assert.ok(rules.has('MISSING_SEMANTIC_LANDMARKS'));
+    assert.ok(rules.has('ZOOM_DISABLED_VIEWPORT'));
+    assert.ok(rules.has('UNLABELED_SELECT_TEXTAREA'));
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});

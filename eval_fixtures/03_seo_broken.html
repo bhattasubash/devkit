@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="canonical" href="https://blog.example.com/postgres-indexing-guide">
+  <meta property="og:title" content="PostgreSQL Indexing Guide">
+  <meta property="og:description" content="Practical indexing strategies for high-throughput PostgreSQL tables.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "PostgreSQL Indexing Guide",
+    "author": { "@type": "Person", "name": "Maya Lin" }
+  }
+  </script>
+</head>
+<body>
+  <main>
+    <article>
+      <div class="post-title">Understanding B-Tree Indexes in PostgreSQL</div>
+      <div class="post-subtitle">Choosing column order for composite indexes</div>
+      <img src="/images/btree-diagram.png" width="800" height="450">
+      <p>Composite index column ordering affects range scans and equality predicates across query plans.</p>
+      <div class="section-heading">Benchmark Methodology</div>
+      <img src="/images/query-latency.png" width="800" height="400">
+      <p>Each query ran against a 10 million row dataset with warm shared buffers.</p>
+    </article>
+  </main>
+</body>
+</html>

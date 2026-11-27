@@ -1,0 +1,11 @@
+/* styles.css — Allowed by .devkit/scope.json */
+.header {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  gap: 8px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #3b82f6;
+  transition: all 200ms ease;
+}

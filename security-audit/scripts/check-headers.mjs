@@ -1,28 +1,121 @@
 #!/usr/bin/env node
 
 /**
- * check-headers.mjs — Zero-dependency security headers checker
+ * check-headers.mjs — Zero-dependency security headers checker with SSRF protection
  *
  * Checks a URL for required security headers and reports their status.
+ * Refuses localhost, loopback, private, and cloud metadata IP addresses (SSRF guard).
  *
  * Usage:  node check-headers.mjs <url>
  * Output: JSON object with each header's status to stdout.
- *         Exit 0 = all pass, 1 = any fail/missing, 2 = error.
+ *         Exit 0 = all pass, 1 = any fail/missing, 2 = error or blocked SSRF target.
  *
  * Requires Node.js 18+ (native fetch).
  */
 
-const url = process.argv[2];
+import { lookup } from 'node:dns/promises';
+import { isIP } from 'node:net';
+
+const args = process.argv.slice(2);
+if (args.includes('--help') || args.includes('-h')) {
+  console.log(`check-headers.mjs — Zero-dependency security headers checker
+
+Usage:
+  node check-headers.mjs <url>
+
+Options:
+  --help, -h    Show this help message and exit
+
+Checks:
+  - HSTS (Strict-Transport-Security)
+  - CSP (Content-Security-Policy)
+  - X-Content-Type-Options (nosniff)
+  - Referrer-Policy
+  - Permissions-Policy
+  - Frame Protection (X-Frame-Options or CSP frame-ancestors)
+  - COOP (Cross-Origin-Opener-Policy)
+  - Set-Cookie flags (HttpOnly, Secure, SameSite) when cookies are set
+
+Exit codes:
+  0: All checked headers pass
+  1: One or more headers missing/weak
+  2: Usage error, blocked private/loopback SSRF target, or network error
+`);
+  process.exit(0);
+}
+
+const url = args[0];
 
 if (!url) {
   console.error('Usage: node check-headers.mjs <url>');
   process.exit(2);
 }
 
-// Require a scheme
 if (!/^https?:\/\//i.test(url)) {
   console.error(JSON.stringify({ error: `URL must start with http:// or https://. Got: ${url}` }));
   process.exit(2);
+}
+
+function isPrivateOrLoopbackIPv4(ip) {
+  const parts = ip.split('.').map(Number);
+  if (parts.length !== 4 || parts.some((n) => Number.isNaN(n) || n < 0 || n > 255)) return false;
+  const [a, b] = parts;
+  if (a === 0 || a === 10 || a === 127) return true;
+  if (a === 169 && b === 254) return true; // Cloud metadata & link-local
+  if (a === 172 && b >= 16 && b <= 31) return true;
+  if (a === 192 && b === 168) return true;
+  if (a === 100 && b >= 64 && b <= 127) return true; // CGNAT
+  return false;
+}
+
+function isPrivateOrLoopbackIP(ip) {
+  const clean = ip.replace(/^\[|\]$/g, '').toLowerCase();
+  if (isIP(clean) === 4) return isPrivateOrLoopbackIPv4(clean);
+  if (isIP(clean) === 6) {
+    if (clean === '::1' || clean === '::') return true;
+    if (clean.startsWith('fc') || clean.startsWith('fd')) return true; // ULA
+    if (clean.startsWith('fe80:')) return true; // Link-local
+    const v4Mapped = clean.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/i);
+    if (v4Mapped) return isPrivateOrLoopbackIPv4(v4Mapped[1]);
+  }
+  return false;
+}
+
+async function assertSafeTargetUrl(rawUrl) {
+  let parsed;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    throw new Error(`Invalid URL: ${rawUrl}`);
+  }
+
+  const hostname = parsed.hostname.replace(/^\[|\]$/g, '').toLowerCase();
+  if (
+    hostname === 'localhost' ||
+    hostname.endsWith('.localhost') ||
+    hostname.endsWith('.local') ||
+    hostname.endsWith('.internal')
+  ) {
+    throw new Error(`Refusing local/private hostname (SSRF protection): ${hostname}`);
+  }
+
+  if (isIP(hostname) && isPrivateOrLoopbackIP(hostname)) {
+    throw new Error(`Refusing private or loopback IP address (SSRF protection): ${hostname}`);
+  }
+
+  if (!isIP(hostname)) {
+    try {
+      const records = await lookup(hostname, { all: true });
+      for (const rec of records) {
+        if (isPrivateOrLoopbackIP(rec.address)) {
+          throw new Error(`Refusing hostname resolving to private/loopback IP (${rec.address}) (SSRF protection): ${hostname}`);
+        }
+      }
+    } catch (err) {
+      if (err.message.includes('SSRF protection')) throw err;
+      // Allow fetch() to surface standard DNS resolution failures
+    }
+  }
 }
 
 const TIMEOUT_MS = 10_000;
@@ -45,13 +138,10 @@ const CHECKS = [
     name: 'CSP',
     test: (value) => {
       if (!value) return { status: 'missing', detail: "Header not present. Set at minimum: default-src 'self'" };
-      // Flag wildcard default-src
       if (/default-src\s[^;]*\*/.test(value))
         return { status: 'fail', detail: 'default-src allows wildcard (*) — this is effectively no CSP', value };
-      // Flag unsafe-eval
       if (value.includes('unsafe-eval'))
         return { status: 'fail', detail: "Contains 'unsafe-eval' which allows arbitrary script execution", value };
-      // Flag unsafe-inline without nonce or strict-dynamic
       if (value.includes('unsafe-inline') && !value.includes('nonce-') && !value.includes('strict-dynamic'))
         return { status: 'warn', detail: "Contains 'unsafe-inline' without nonce or strict-dynamic", value };
       return { status: 'pass', value };
@@ -71,9 +161,8 @@ const CHECKS = [
     name: 'Referrer-Policy',
     test: (value) => {
       if (!value) return { status: 'missing', detail: 'Header not present. Recommended: strict-origin-when-cross-origin' };
-      // Check for unsafe policies
       const policies = value.split(',').map(p => p.trim().toLowerCase());
-      const lastPolicy = policies[policies.length - 1]; // browser uses the last valid one
+      const lastPolicy = policies[policies.length - 1];
       if (UNSAFE_REFERRER_POLICIES.has(lastPolicy))
         return { status: 'fail', detail: `"${lastPolicy}" leaks full URLs to other origins. Use strict-origin-when-cross-origin or stricter.`, value };
       return { status: 'pass', value };
@@ -99,6 +188,31 @@ const CHECKS = [
       return { status: 'fail', detail: `Unexpected value: ${value}`, value };
     },
   },
+  {
+    header: 'cross-origin-opener-policy',
+    name: 'COOP',
+    test: (value) => {
+      if (!value) return { status: 'missing', detail: 'Header not present. Recommended: same-origin' };
+      const v = value.toLowerCase().trim();
+      if (v === 'same-origin' || v === 'same-origin-allow-popups') return { status: 'pass', value };
+      return { status: 'warn', detail: `Weak COOP value: ${value}`, value };
+    },
+  },
+  {
+    header: 'set-cookie',
+    name: 'Cookie Flags',
+    test: (value) => {
+      if (!value) return { status: 'pass', detail: 'No Set-Cookie headers present on response' };
+      const missingFlags = [];
+      if (!/;\s*httponly\b/i.test(value)) missingFlags.push('HttpOnly');
+      if (!/;\s*secure\b/i.test(value)) missingFlags.push('Secure');
+      if (!/;\s*samesite=(?:strict|lax)\b/i.test(value)) missingFlags.push('SameSite=Lax|Strict');
+      if (missingFlags.length > 0) {
+        return { status: 'fail', detail: `Set-Cookie missing security flags: ${missingFlags.join(', ')}` };
+      }
+      return { status: 'pass', detail: 'Cookies include HttpOnly, Secure, and SameSite flags' };
+    },
+  },
 ];
 
 async function fetchWithFallback(targetUrl) {
@@ -106,14 +220,12 @@ async function fetchWithFallback(targetUrl) {
   const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
-    // Try HEAD first
     const headResponse = await fetch(targetUrl, {
       method: 'HEAD',
       redirect: 'follow',
       signal: controller.signal,
     });
 
-    // If HEAD returns 405, fall back to GET
     if (headResponse.status === 405) {
       clearTimeout(timeout);
       const controller2 = new AbortController();
@@ -137,11 +249,11 @@ async function fetchWithFallback(targetUrl) {
 }
 
 try {
+  await assertSafeTargetUrl(url);
   const response = await fetchWithFallback(url);
   const results = {};
   let hasFailure = false;
 
-  // Warn on non-2xx status — headers may be incomplete or from an error page
   const statusWarning = response.status < 200 || response.status >= 300
     ? `Warning: server returned ${response.status}. Headers may not reflect the real page.`
     : null;

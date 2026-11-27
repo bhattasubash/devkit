@@ -1,0 +1,56 @@
+{
+  "group_a": {
+    "01_ai_slop_landing.html": {
+      "description": "SaaS hero page with purple-blue gradient, Inter font, AI copywriting clichés, and 3-column generic icon card grid",
+      "expected_checks": [
+        { "id": "C01-1", "domain": "design", "any_rules": ["AI_PURPLE_BLUE_GRADIENT", "LITERAL_COLOR"], "label": "Purple-to-blue gradient / literal hex in <style>" },
+        { "id": "C01-2", "domain": "design", "any_rules": ["AI_DEFAULT_FONT"], "label": "Default Inter font family" },
+        { "id": "C01-3", "domain": "design", "any_rules": ["AI_COPY_CLICHE"], "label": "AI cliché copy (unleash/seamless/delve)" },
+        { "id": "C01-4", "domain": "design", "any_rules": ["REPEATED_ICON_CARD_GRID"], "label": "3-column generic icon card grid" }
+      ]
+    },
+    "02_security_leaks.html": {
+      "description": "Frontend page with hardcoded gateway secret key, http:// form action, target=_blank without noopener, and URL query innerHTML XSS",
+      "expected_checks": [
+        { "id": "C02-1", "domain": "secrets", "any_rules": ["Secret Key Assign"], "label": "Hardcoded CHECKOUT_SECRET_KEY in client script" },
+        { "id": "C02-2", "domain": "code-security", "any_rules": ["INSECURE_FORM_ACTION"], "label": "Insecure http:// form submission action" },
+        { "id": "C02-3", "domain": "code-security", "any_rules": ["UNSAFE_TARGET_BLANK"], "label": "target=_blank link missing rel=noopener" },
+        { "id": "C02-4", "domain": "code-security", "any_rules": ["DOM_XSS_INNERHTML"], "label": "innerHTML sink fed by URL query parameter" }
+      ]
+    },
+    "03_seo_broken.html": {
+      "description": "Blog article missing title and meta description, div headings instead of h1-h3, img missing alt, and robots noindex",
+      "expected_checks": [
+        { "id": "C03-1", "domain": "html", "any_rules": ["MISSING_TITLE"], "label": "Missing <title>" },
+        { "id": "C03-2", "domain": "html", "any_rules": ["MISSING_META_DESCRIPTION"], "label": "Missing <meta name=description>" },
+        { "id": "C03-3", "domain": "html", "any_rules": ["MISSING_H1", "IMG_MISSING_ALT"], "label": "Missing <h1> and missing img alt attributes" },
+        { "id": "C03-4", "domain": "seo", "any_rules": ["META_ROBOTS_NOINDEX"], "label": "Public page blocked by robots noindex" }
+      ]
+    },
+    "04_aeo_invisible.html": {
+      "description": "Product/FAQ page built solely with nested divs, zero JSON-LD, vague headings, and no llms.txt reference",
+      "expected_checks": [
+        { "id": "C04-1", "domain": "html", "any_rules": ["MISSING_SEMANTIC_LANDMARKS"], "label": "Nested <div> structure without <main>/<article>/<section>" },
+        { "id": "C04-2", "domain": "seo", "any_rules": ["MISSING_JSONLD"], "label": "Zero JSON-LD structured data" },
+        { "id": "C04-3", "domain": "seo", "any_rules": ["AEO_VAGUE_HEADINGS"], "label": "Vague non-question headings (Learn More / Overview / Features)" },
+        { "id": "C04-4", "domain": "seo", "any_rules": ["AEO_NO_LLMS_TXT_REF"], "label": "No llms.txt reference found" }
+      ]
+    },
+    "05_mixed_disaster.html": {
+      "description": "Combines AI slop copy, exposed Firebase API key, missing canonical, and missing FAQ/Organization schema",
+      "expected_checks": [
+        { "id": "C05-1", "domain": "design", "any_rules": ["AI_COPY_CLICHE"], "label": "AI slop copy (Elevate your game)" },
+        { "id": "C05-2", "domain": "secrets", "any_rules": ["Firebase Web API Key", "Google API Key"], "label": "Exposed Firebase/Google API key in <script>" },
+        { "id": "C05-3", "domain": "seo", "any_rules": ["MISSING_CANONICAL"], "label": "Missing canonical link tag" },
+        { "id": "C05-4", "domain": "seo", "any_rules": ["MISSING_JSONLD"], "label": "Missing FAQPage / Organization JSON-LD schema" }
+      ]
+    }
+  },
+  "group_b": {
+    "06_clean_stripe_docs.html": { "max_actionable_findings": 0 },
+    "07_clean_linear_style.html": { "max_actionable_findings": 0 },
+    "08_clean_mdn_reference.html": { "max_actionable_findings": 0 },
+    "09_clean_minimal_blog.html": { "max_actionable_findings": 0 },
+    "10_clean_saas_pricing.html": { "max_actionable_findings": 0 }
+  }
+}

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https:; object-src 'none'; base-uri 'self'">
+  <title>Payment Intents API Guide — LedgerPay Docs</title>
+  <meta name="description" content="Step-by-step integration reference for creating, confirming, and reconciling payment intents with idempotency keys.">
+  <link rel="canonical" href="https://docs.ledgerpay.example.com/payments/intents">
+  <link rel="alternate" type="text/plain" href="/llms.txt" title="LLMs Documentation Index">
+  <meta property="og:title" content="Payment Intents API Guide — LedgerPay Docs">
+  <meta property="og:description" content="Create, confirm, and reconcile payment intents with idempotency keys.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    "headline": "Payment Intents API Guide",
+    "author": { "@type": "Organization", "name": "LedgerPay Docs Team" },
+    "datePublished": "2026-10-12"
+  }
+  </script>
+  <style>
+    :root {
+      --color-bg: #f8fafc;
+      --color-surface: #ffffff;
+      --color-text: #0f172a;
+      --color-muted: #475569;
+      --color-border: #e2e8f0;
+      --color-accent: #0f766e;
+      --font-sans: 'Sohne', ui-sans-serif, system-ui, -apple-system, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+      --radius-sm: 6px;
+    }
+    body {
+      margin: 0;
+      font-family: var(--font-sans);
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.6;
+    }
+    a:focus-visible, button:focus-visible {
+      outline: 2px solid var(--color-accent);
+      outline-offset: 2px;
+    }
+    .docs-layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      gap: 32px;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+    .code-block {
+      font-family: var(--font-mono);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav aria-label="Primary documentation">
+      <a href="/docs">Documentation</a>
+      <a href="/docs/api">API Reference</a>
+      <a href="https://status.ledgerpay.example.com" target="_blank" rel="noopener noreferrer">API Status</a>
+    </nav>
+  </header>
+  <main class="docs-layout">
+    <aside aria-label="Section index">
+      <ul>
+        <li><a href="#lifecycle">Lifecycle states</a></li>
+        <li><a href="#idempotency">Idempotency keys</a></li>
+      </ul>
+    </aside>
+    <article>
+      <h1>Payment Intents API</h1>
+      <p>Use the Payment Intents resource to track a single payment from creation through settlement.</p>
+      <img src="/assets/intent-state-diagram.svg" alt="Payment intent state machine from requires_payment_method to succeeded" width="720" height="240">
+      <h2 id="lifecycle">How does the intent lifecycle transition?</h2>
+      <p>Each intent moves monotonically from <code>requires_payment_method</code> to <code>processing</code> and finally <code>succeeded</code>.</p>
+      <h2 id="idempotency">Why pass an Idempotency-Key header?</h2>
+      <p>Clients send a UUID v4 in <code>Idempotency-Key</code> so safe network retries return the original server response without double-charging.</p>
+      <pre class="code-block"><code>POST /v1/payment_intents</code></pre>
+    </article>
+  </main>
+  <footer>
+    <p>LedgerPay API Documentation v2026-10</p>
+  </footer>
+</body>
+</html>

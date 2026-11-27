@@ -19,17 +19,17 @@ Ensure typography, color harmony, layout breathing room, and motions feel intent
 - **Full**: Visual identity inventory, 2 distinct directions in words, full `:root` token mapping, and fresh review.
 
 ## Procedure
-1. Initialize state: `node anti-slop-design/scripts/devkit-state.mjs init --skill anti-slop-design --mode <mode>`.
-2. Run scanner: `node anti-slop-design/scripts/lint-design.mjs .`.
+1. Initialize state: `node anti-slop-design/scripts/devkit-state.mjs init --skill anti-slop-design --mode <mode>` (record inventory via `devkit-state.mjs record --evidence "<files>"` and `advance`).
+2. Run scanner: `node anti-slop-design/scripts/lint-design.mjs .` and record scan evidence before `advance`.
 3. Check rules: Load `references/anti-patterns.md`, `references/design-tokens.md`, and `references/component-states.md`.
-4. Draft fix plan and write `.devkit/scope.json` containing `allowed_files` and `allow_dependency_changes: false`.
+4. Draft fix plan, write `.devkit/scope.json` (`allowed_files`, `allow_dependency_changes: false`), and run `devkit-state.mjs record --evidence "<plan>"`.
 5. Approval Gate:
    STOP. Reply 'approve' to continue, or tell me what to change. Do not continue until the user replies in this chat.
-6. Apply approved fixes, updating token values, component layouts, and interactive states.
+6. After approval, run `node anti-slop-design/scripts/devkit-state.mjs approve --phase plan` and `advance`. Apply fixes, then record & `advance`.
 7. Verify scope: Run `node anti-slop-design/scripts/check-scope.mjs .devkit/scope.json`.
 8. Verify evidence: Run `node anti-slop-design/scripts/verify-findings.mjs .devkit/reports/findings.json`.
-9. Advance state: `node anti-slop-design/scripts/devkit-state.mjs advance`.
-10. Generate final report at `.devkit/reports/design.md`.
+9. Record verification and advance state: `node anti-slop-design/scripts/devkit-state.mjs record --evidence "<checks>"` then `advance`.
+10. Generate final report at `.devkit/reports/design.md`, record evidence, and `advance` to complete.
 *Note*: If installed inside an agent skills folder (e.g. `.agents/skills/anti-slop-design/`), prefix script paths with that parent skills folder.
 
 ## Evidence Rules

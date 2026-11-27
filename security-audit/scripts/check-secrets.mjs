@@ -16,7 +16,8 @@
  */
 
 import { readdir, readFile, stat, access } from 'node:fs/promises';
-import { join, extname, basename, resolve, relative } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { join, extname, basename, resolve, relative, dirname } from 'node:path';
 import { execFileSync } from 'node:child_process';
 
 // --- CLI Option Handling ---
@@ -52,14 +53,39 @@ Exit Codes:
   process.exit(0);
 }
 
-const SKIP_DIRS = new Set(['node_modules', '.git', '__pycache__', '.venv', 'venv', 'dist', 'build', '.next', '.nuxt', 'evals', '.devkit']);
+const BASE_SKIP_DIRS = new Set(['node_modules', '.git', '__pycache__', '.venv', 'venv', 'dist', 'build', '.next', '.nuxt', '.devkit']);
 const SKIP_EXTS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif', '.ico', '.svg', '.woff', '.woff2', '.ttf', '.otf', '.eot', '.mp4', '.mp3', '.zip', '.tar', '.gz', '.lock', '.lockb']);
 const MAX_FILE_SIZE = 512 * 1024; // 512 KB
+
+function isSelfDevkitRepo(rootDir) {
+  try {
+    const pkgPath = join(rootDir, 'package.json');
+    if (!existsSync(pkgPath)) return false;
+    const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+    return pkg?.name === '@bhattasubash/devkit';
+  } catch {
+    return false;
+  }
+}
 
 const SENSITIVE_FILES = ['.env', '.env.local', '.env.production', '.env.staging', '.env.development'];
 
 const COMMENT_PLACEHOLDER_RE = /example|placeholder|your[_-]?key|change[_-]?me|xxx|todo|sample|dummy|test_key/i;
 const EXACT_PLACEHOLDER_RE = /^(?:your[_-]?(?:api[_-]?)?key(?:[_-]?here)?|change[_-]?me|xxx+|placeholder|todo|sample[_-]?key)$/i;
+
+function isPlaceholderSecret(secretVal) {
+  if (!secretVal || typeof secretVal !== 'string') return true;
+  if (EXACT_PLACEHOLDER_RE.test(secretVal)) return true;
+
+  const stripped = secretVal.replace(/^(?:sk_(?:live|test)_|pk_(?:live|test)_|ghp_|gho_|github_pat_|sk-ant-|sk-proj-|sk-|AKIA|AIza|xox[bp]-|SG\.)/i, '');
+  if (/(?:your[_-]?(?:secret|api)?[_-]?key|secret[_-]?key[_-]?here|placeholder|change[_-]?me|replace[_-]?me|example[_-]?key|dummy[_-]?key)/i.test(stripped)) {
+    return true;
+  }
+  if (/^[0xX*_-]{12,}$/.test(stripped) || /(?:0{12,}|[xX]{10,})/.test(stripped)) {
+    return true;
+  }
+  return false;
+}
 
 function redact(value) {
   if (!value || typeof value !== 'string') return '***';
@@ -147,11 +173,12 @@ const PATTERNS = [
     note: 'Public-by-design Stripe publishable key for client-side checkout.',
     regex: /(?<![\w-])pk_(?:live|test)_[a-zA-Z0-9]{24,}(?![\w-])/g,
   },
-  // Google / Firebase API Key
+  // Google / Firebase API Key (check nearby context lines for multi-line firebaseConfig objects)
   {
     name: 'Google / Firebase Key',
-    customCheck: (match, line) => {
-      const isFirebase = /firebase|firebaseConfig|appId|authDomain|storageBucket|messagingSenderId/i.test(line);
+    customCheck: (match, line, contextWindow = '') => {
+      const scope = `${contextWindow}\n${line}`;
+      const isFirebase = /firebase|firebaseConfig|firebaseapp\.com|appId|authDomain|storageBucket|messagingSenderId/i.test(scope);
       if (isFirebase) {
         return {
           pattern: 'Firebase Web API Key',
@@ -165,6 +192,12 @@ const PATTERNS = [
       };
     },
     regex: /(?<![A-Za-z0-9_-])AIza[0-9A-Za-z_-]{35}(?![A-Za-z0-9_-])/g,
+  },
+  // Publicly exposed Next.js secret env var naming
+  {
+    name: 'NEXT_PUBLIC Secret Env',
+    severity: 'high',
+    regex: /\bNEXT_PUBLIC_[A-Z0-9_]*(?:SECRET|PRIVATE_KEY|SERVICE_ROLE|PASSWORD|DATABASE_URL|API_SECRET)\b/g,
   },
   // GitHub Personal Access Token (classic)
   {
@@ -219,11 +252,11 @@ const PATTERNS = [
     severity: 'critical',
     regex: /(?:SECRET_KEY|DJANGO_SECRET_KEY|FLASK_SECRET_KEY|Rails\.application\.credentials)\s*[=:]\s*['"]([^'"]{8,})['"]/gi,
   },
-  // Hardcoded environment variable fallbacks (process.env.KEY || "secret")
+  // Hardcoded environment variable fallbacks (process.env.KEY || "secret" or ?? "secret")
   {
     name: 'Hardcoded Fallback Secret',
     severity: 'high',
-    regex: /(?:process\.env\.[a-zA-Z0-9_]+|os\.environ\[[^\]]+\]|getenv\([^)]+\))\s*\|\|\s*['"]([^'"]{8,})['"]/gi,
+    regex: /(?:process\.env\.[a-zA-Z0-9_]+|os\.environ\[[^\]]+\]|getenv\([^)]+\))\s*(?:\|\||\?\?)\s*['"]([^'"]{8,})['"]/gi,
     isFallback: true,
     isGeneric: true,
   },
@@ -278,25 +311,72 @@ const PATTERNS = [
 const findings = [];
 const warnings = [];
 const local_only_notes = [];
+let findingCounter = 0;
 
-async function scanFile(filePath, gitRoot) {
+function nextId() {
+  findingCounter++;
+  return `SEC-${String(findingCounter).padStart(3, '0')}`;
+}
+
+const NON_SECRET_QUOTE_PATTERNS = new Set([
+  'NEXT_PUBLIC Secret Env',
+  'Private Key Block',
+  'Stripe Publishable Key',
+  'Firebase Web API Key',
+  'Supabase Anon Key (JWT)',
+]);
+
+function buildSafeQuote(line, matchStart, matchEnd, fullMatch, patternName) {
+  if (NON_SECRET_QUOTE_PATTERNS.has(patternName)) {
+    return { quote: fullMatch.trim().slice(0, 120), findingType: 'line' };
+  }
+  const before = line.slice(0, matchStart).trim();
+  if (before.replace(/["'`\s]/g, '').length >= 3) {
+    return { quote: before.slice(-100), findingType: 'line' };
+  }
+  const after = line.slice(matchEnd).trim();
+  if (after.replace(/["'`;,\s]/g, '').length >= 3) {
+    return { quote: after.slice(0, 100), findingType: 'line' };
+  }
+  return { quote: `[REDACTED ${patternName}]`, findingType: 'whole_file' };
+}
+
+function buildFix(patternName, severity) {
+  if (severity === 'info') {
+    return `Verify public-by-design ${patternName} is protected by server-side authorization / Row Level Security.`;
+  }
+  if (patternName === 'Hardcoded Fallback Secret') {
+    return 'Remove the hardcoded fallback literal and fail fast if the required environment variable is missing.';
+  }
+  if (patternName === 'NEXT_PUBLIC Secret Env') {
+    return 'Remove the NEXT_PUBLIC_ prefix from secret env vars so they are never bundled into client JavaScript.';
+  }
+  return `Move ${patternName} to a server-side environment variable or secret manager and rotate the exposed credential.`;
+}
+
+async function scanFile(filePath, gitRoot, baseDir) {
   const name = basename(filePath);
+  const relPath = relative(baseDir, filePath).replace(/\\/g, '/') || name;
 
   // Check sensitive files (.env, etc.)
   if (SENSITIVE_FILES.includes(name)) {
     if (isGitIgnored(filePath, gitRoot)) {
       local_only_notes.push({
-        file: filePath,
+        file: relPath,
         note: `Git-ignored local file present: ${name} (not committed)`,
       });
       return;
     } else {
       findings.push({
-        file: filePath,
+        id: nextId(),
+        file: relPath,
         line: 0,
+        finding_type: 'whole_file',
         pattern: 'Sensitive file committed',
         severity: 'critical',
         snippet: `File "${name}" found and not in .gitignore`,
+        quote: `Sensitive file committed: ${name}`,
+        fix: `Add "${name}" to .gitignore, untrack it from git, and rotate all credentials inside it.`,
       });
       return;
     }
@@ -343,8 +423,8 @@ async function scanFile(filePath, gitRoot) {
         const matchEnd = match.index + fullMatch.length;
         const secretVal = match[1] || fullMatch;
 
-        // Skip exact placeholder values
-        if (EXACT_PLACEHOLDER_RE.test(secretVal)) continue;
+        // Skip placeholder / low-entropy dummy values
+        if (isPlaceholderSecret(secretVal)) continue;
 
         // Skip template strings in Bearer tokens
         if (patternDef.name === 'Bearer Token' && (/\$\{|%s|{{|process\.env/i.test(fullMatch))) {
@@ -367,7 +447,10 @@ async function scanFile(filePath, gitRoot) {
         let note = patternDef.note || undefined;
 
         if (patternDef.customCheck) {
-          const custom = patternDef.customCheck(fullMatch, line);
+          const ctxStart = Math.max(0, i - 4);
+          const ctxEnd = Math.min(lines.length, i + 5);
+          const contextWindow = lines.slice(ctxStart, ctxEnd).join('\n');
+          const custom = patternDef.customCheck(fullMatch, line, contextWindow);
           patternName = custom.pattern;
           severity = custom.severity;
           note = custom.note;
@@ -375,12 +458,18 @@ async function scanFile(filePath, gitRoot) {
 
         matchedRanges.push({ start: matchStart, end: matchEnd, severity });
 
+        const { quote, findingType } = buildSafeQuote(line, matchStart, matchEnd, fullMatch, patternName);
+
         findings.push({
-          file: filePath,
+          id: nextId(),
+          file: relPath,
           line: i + 1,
+          ...(findingType !== 'line' ? { finding_type: findingType } : {}),
           pattern: patternName,
           severity,
           snippet: redact(secretVal),
+          quote,
+          fix: buildFix(patternName, severity),
           ...(note ? { note } : {}),
         });
       }
@@ -388,7 +477,7 @@ async function scanFile(filePath, gitRoot) {
   }
 }
 
-async function scanDir(dir, gitRoot) {
+async function scanDir(dir, gitRoot, baseDir, skipDirs) {
   let entries;
   try {
     entries = await readdir(dir, { withFileTypes: true });
@@ -399,13 +488,13 @@ async function scanDir(dir, gitRoot) {
   for (const entry of entries) {
     const full = join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (!SKIP_DIRS.has(entry.name) && !entry.name.startsWith('.devkit')) {
-        await scanDir(full, gitRoot);
+      if (!skipDirs.has(entry.name) && !entry.name.startsWith('.devkit')) {
+        await scanDir(full, gitRoot, baseDir, skipDirs);
       }
     } else if (entry.isFile()) {
       const ext = extname(entry.name).toLowerCase();
       if (!SKIP_EXTS.has(ext)) {
-        await scanFile(full, gitRoot);
+        await scanFile(full, gitRoot, baseDir);
       }
     }
   }
@@ -424,20 +513,32 @@ try {
 }
 
 const targetStat = await stat(resolved);
-if (!targetStat.isDirectory()) {
-  console.error(JSON.stringify({ error: `Not a directory: ${target}`, resolved }));
-  process.exit(2);
+const baseDir = targetStat.isFile() ? dirname(resolved) : resolved;
+const skipDirs = new Set(BASE_SKIP_DIRS);
+if (isSelfDevkitRepo(baseDir)) {
+  skipDirs.add('evals');
+  skipDirs.add('eval_fixtures');
 }
 
-const gitRoot = findGitRoot(resolved);
+let gitRoot = null;
 
-await scanDir(resolved, gitRoot);
+if (targetStat.isFile()) {
+  gitRoot = findGitRoot(resolve(resolved, '..'));
+  await scanFile(resolved, gitRoot, baseDir);
+} else if (targetStat.isDirectory()) {
+  gitRoot = findGitRoot(resolved);
+  await scanDir(resolved, gitRoot, baseDir, skipDirs);
+} else {
+  console.error(JSON.stringify({ error: `Not a file or directory: ${target}`, resolved }));
+  process.exit(2);
+}
 
 const output = {
   findings,
   warnings,
   local_only_notes,
   scanned_root: resolved,
+  supports_single_file: true,
 };
 
 console.log(JSON.stringify(output, null, 2));

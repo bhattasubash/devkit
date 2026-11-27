@@ -65,3 +65,14 @@ Walk every table during the **Audit** phase. For each pattern found, record: fil
 | Section numbering and checkmark (✓) bullets everywhere | Numbers only for real sequences (steps, rankings). Bullets for unordered lists. No decorative checkmarks. | A how-to guide with actual sequential steps. | Finish |
 | Generic mockups, placeholder screenshots | Real product screenshots, real demos, or leave blank with a slot for the user to fill. | A pre-launch page where the product isn't built yet — use a clear placeholder labeled "screenshot goes here". | Reflex |
 | Missing loading states, no empty/error states | Skeleton loaders for async content. Empty states with explanation + next action. Error states with plain-language message + recovery. | Never acceptable to omit. Load `references/component-states.md` for the full checklist. | Floor |
+
+---
+
+## React / TSX & Tailwind Code Tells
+
+| Pattern to Avoid | What to Do Instead | When It's Acceptable | Severity |
+|-----------------|-------------------|---------------------|----------|
+| Arbitrary spacing/radius values (`p-[13px]`, `rounded-[22px]`) | Use theme scale tokens (`p-4`, `gap-6`, `rounded-md`). | Never for layout spacing; document if aligning to a third-party widget. | Reflex |
+| `!important` utility overrides outside reduced-motion resets | Fix selector order or component variant styling cleanly. | Only inside `@media (prefers-reduced-motion: reduce)` safety resets. | Reflex |
+| Purple/indigo/pink default gradients (`from-purple-500 ... to-indigo-500`) | Use flat surface tokens or a brand-specific palette from `:root`. | Only when documented as an intentional brand signature. | Floor |
+| Cliché copy in headings ("Elevate your game", "Unleash the power", "Seamless AI") | State the concrete mechanism, numeric constraint, or user outcome. | Never. | Reflex |

@@ -7,6 +7,8 @@
  *   init [--state <path>] [--skill <name>] [--mode <mode>] [--phases <list>]
  *   get [--state <path>] [key]
  *   set [--state <path>] <key> <value>
+ *   record [--state <path>] [--phase <name>] --evidence <text>
+ *   approve [--state <path>] [--phase <name>]
  *   advance [--state <path>]
  *   validate [--state <path>]
  *
@@ -32,6 +34,8 @@ function parseArgs(rawArgs) {
     skill: null,
     mode: null,
     phases: null,
+    phase: null,
+    evidence: null,
   };
   const positional = [];
 
@@ -47,6 +51,10 @@ function parseArgs(rawArgs) {
       options.mode = rawArgs[++i];
     } else if (arg === '--phases') {
       options.phases = rawArgs[++i].split(',').map(s => s.trim()).filter(Boolean);
+    } else if (arg === '--phase') {
+      options.phase = rawArgs[++i];
+    } else if (arg === '--evidence') {
+      options.evidence = rawArgs[++i];
     } else if (!command) {
       command = arg;
     } else {
@@ -67,15 +75,19 @@ Commands:
   init      Initialize a new state.json file from the template
   get       Retrieve full state or a specific key by dot notation
   set       Update a specific key in state (e.g. key=value or dot path)
+  record    Record evidence for the current or named phase
+  approve   Mark the current or named approval phase as approved_by_user
   advance   Advance to the next phase (enforces evidence & approval gates)
   validate  Validate that a state file adheres to required schema & gates
 
 Options:
-  --state <path>    Path to state.json (defaults to .devkit/state.json)
-  --skill <name>    Skill name to record during init (e.g. security-audit)
-  --mode <mode>     Mode to record during init (lite, standard, full)
-  --phases <list>   Comma-separated phase names for custom workflow init
-  --help, -h        Show this help message
+  --state <path>     Path to state.json (defaults to .devkit/state.json)
+  --skill <name>     Skill name to record during init (e.g. security-audit)
+  --mode <mode>      Mode to record during init (lite, standard, full)
+  --phases <list>    Comma-separated phase names for custom workflow init
+  --phase <name>     Target phase name for record / approve
+  --evidence <text>  Evidence text or JSON for record
+  --help, -h         Show this help message
 
 Exit codes:
   0: Success
@@ -202,7 +214,7 @@ async function cmdInit(options) {
       name,
       status: idx === 0 ? 'in_progress' : 'pending',
       evidence: null,
-      gate_type: name.includes('plan') || name.includes('report') ? 'approval' : 'none',
+      gate_type: name.includes('plan') ? 'approval' : 'none',
       approved_by_user: false,
       completed_at: null,
     }));
@@ -241,6 +253,47 @@ async function cmdSet(options, key, rawVal) {
   setByPath(state, key, val);
   await saveState(options.statePath, state);
   console.log(JSON.stringify({ status: 'updated', key, value: val }, null, 2));
+}
+
+async function cmdRecord(options, positional) {
+  const state = await loadState(options.statePath);
+  if (!Array.isArray(state.phases) || state.phases.length === 0) {
+    console.error(JSON.stringify({ error: 'Invalid state: no phases defined.' }));
+    process.exit(2);
+  }
+  const targetIdx = options.phase
+    ? state.phases.findIndex((p) => p.name === options.phase)
+    : (state.current_phase_index ?? state.phases.findIndex((p) => p.name === state.current_phase));
+  if (targetIdx < 0 || targetIdx >= state.phases.length) {
+    console.error(JSON.stringify({ error: `Phase not found: ${options.phase || state.current_phase}` }));
+    process.exit(2);
+  }
+  const rawEvidence = options.evidence ?? positional[0];
+  if (!rawEvidence || String(rawEvidence).trim().length === 0) {
+    console.error(JSON.stringify({ error: 'Missing evidence. Usage: record --evidence "<summary>"' }));
+    process.exit(2);
+  }
+  state.phases[targetIdx].evidence = parseValue(rawEvidence);
+  await saveState(options.statePath, state);
+  console.log(JSON.stringify({ status: 'recorded', phase: state.phases[targetIdx].name, evidence: state.phases[targetIdx].evidence }, null, 2));
+}
+
+async function cmdApprove(options) {
+  const state = await loadState(options.statePath);
+  if (!Array.isArray(state.phases) || state.phases.length === 0) {
+    console.error(JSON.stringify({ error: 'Invalid state: no phases defined.' }));
+    process.exit(2);
+  }
+  const targetIdx = options.phase
+    ? state.phases.findIndex((p) => p.name === options.phase)
+    : (state.current_phase_index ?? state.phases.findIndex((p) => p.name === state.current_phase));
+  if (targetIdx < 0 || targetIdx >= state.phases.length) {
+    console.error(JSON.stringify({ error: `Phase not found: ${options.phase || state.current_phase}` }));
+    process.exit(2);
+  }
+  state.phases[targetIdx].approved_by_user = true;
+  await saveState(options.statePath, state);
+  console.log(JSON.stringify({ status: 'approved', phase: state.phases[targetIdx].name }, null, 2));
 }
 
 async function cmdAdvance(options) {
@@ -340,6 +393,12 @@ async function main() {
         break;
       case 'set':
         await cmdSet(options, positional[0], positional[1]);
+        break;
+      case 'record':
+        await cmdRecord(options, positional);
+        break;
+      case 'approve':
+        await cmdApprove(options);
         break;
       case 'advance':
         await cmdAdvance(options);

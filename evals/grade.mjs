@@ -17,9 +17,15 @@
  *   2 = Usage error or missing files/directories
  */
 
-import { readdir, readFile, stat } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { existsSync, readFileSync } from 'node:fs';
-import { join, resolve, basename, relative } from 'node:path';
+import { execFileSync } from 'node:child_process';
+import { join, resolve, basename, relative, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const SCOPE_SCRIPT = join(__dirname, '..', 'shared', 'scripts', 'check-scope.mjs');
 
 // --- CLI Argument Parsing ---
 const args = process.argv.slice(2);
@@ -168,8 +174,8 @@ async function verifyFinding(f, baseDir, targetFixtureDir) {
     errors.push(`invalid "severity": "${f.severity}" (must be critical|high|medium|low|info)`);
   }
   if (!f.file || typeof f.file !== 'string') errors.push('missing or invalid "file"');
-  if (typeof f.line !== 'number' || !Number.isInteger(f.line) || f.line < 1) {
-    errors.push(`invalid "line": "${f.line}" (must be integer >= 1)`);
+  if (typeof f.line !== 'number' || !Number.isInteger(f.line) || f.line < 0) {
+    errors.push(`invalid "line": "${f.line}" (must be integer >= 0)`);
   }
   if (!f.quote || typeof f.quote !== 'string') errors.push('missing or invalid "quote"');
   if (!f.fix || typeof f.fix !== 'string') errors.push('missing or invalid "fix"');
@@ -178,13 +184,31 @@ async function verifyFinding(f, baseDir, targetFixtureDir) {
     return { valid: false, errors };
   }
 
+  const findingType = f.finding_type ? String(f.finding_type).toLowerCase() : 'line';
+
   // Resolve file existence: check fixture directory first, then base results directory
   let filePath = join(targetFixtureDir, f.file);
   if (!existsSync(filePath)) {
     filePath = join(baseDir, f.file);
   }
+
+  if (findingType === 'missing_file') {
+    if (existsSync(filePath)) {
+      return { valid: false, errors: [`missing_file finding reports file that exists: "${f.file}"`] };
+    }
+    return { valid: true, errors: [] };
+  }
+
   if (!existsSync(filePath)) {
     return { valid: false, errors: [`file does not exist: "${f.file}"`] };
+  }
+
+  if (findingType === 'whole_file') {
+    return { valid: true, errors: [] };
+  }
+
+  if (f.line < 1) {
+    return { valid: false, errors: [`invalid "line": "${f.line}" (must be integer >= 1)`] };
   }
 
   // Check line and quote
@@ -338,6 +362,30 @@ async function checkScopeViolations(dir) {
       const data = JSON.parse(await readFile(scopeViolationsLog, 'utf8'));
       if (Array.isArray(data)) violations.push(...data);
     } catch {}
+  }
+
+  // Run real git diff scope check when resultsDir is its own git workspace
+  if (existsSync(scopeFile) && existsSync(join(dir, '.git'))) {
+    try {
+      execFileSync(process.execPath, [SCOPE_SCRIPT, scopeFile, '--cwd', dir], {
+        encoding: 'utf-8',
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+    } catch (err) {
+      const raw = (err.stdout || err.stderr || '').toString().trim();
+      try {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed.violations)) {
+          for (const v of parsed.violations) {
+            violations.push(v.message || `${v.type}: ${v.file}`);
+          }
+        } else if (parsed.error) {
+          violations.push(parsed.message || parsed.error);
+        }
+      } catch {
+        violations.push(`Scope check failed (exit ${err.status ?? 1})`);
+      }
+    }
   }
 
   return violations;

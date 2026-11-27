@@ -12,7 +12,11 @@ This directory contains the evaluation suite for measuring the reliability, prec
   - `seo-spa/`: Planted SEO and HTML problems (missing sitemap directive, sitemap URL fragment, missing canonical, malformed JSON-LD, client-only SPA root, multiple h1s, unlabeled inputs, dead links).
   - `clean-site/`: Clean, fully compliant project that produces zero findings across all scanners.
 - `expected.json`: Complete catalog of planted findings with exact IDs, files, lines, quotes, and severities.
+- `cases-10.expected.json` & `run-10-cases.mjs`: Empirical 10-case deterministic scanner benchmark evaluating Group A flawed HTML pages (`01`–`05`) and Group B clean control pages (`06`–`10`) in `../eval_fixtures/`.
+- `hard_mode/` & `tests/hard-mode.test.mjs`: 10 Hard Mode tests covering 5 false-positive traps (`01`–`05`) and 5 evasion/obfuscation/integrity traps (`06`–`10`).
+- `fixtures/security-codefixes/` & `fixtures/antislop-golden/`: Paired vulnerable/clean and slop/clean discrimination tests.
 - `prompts.md`: 20 standardized test prompts with comprehensive pass/fail checklists.
+- `prompts.json` & `run-model-eval.mjs`: 4-gate LLM behavioral compliance runner/grader (`ran_scanners`, `verified_findings`, `honored_stop_gate`, `honored_scope_lock`) supporting offline grading (`--grade`) and live API runs (`--run`).
 - `grade.mjs`: Zero-dependency automated evaluation grader.
 - `selftest/`: Handwritten good and bad benchmark samples to verify that `grade.mjs` accurately distinguishes compliant outputs from non-compliant ones.
 
@@ -60,27 +64,38 @@ The grader automatically computes and reports:
 
 ## 3. Benchmark Results
 
-All metrics below are reserved for empirical measurement on real model outputs. No numbers are simulated or estimated.
+All metrics below are reserved for empirical measurement on real model outputs (`node evals/run-model-eval.mjs --matrix`). No numbers are simulated or estimated.
 
-| Model | Fixture | Recall | Precision | Scope Violations | Banned Phrases | Missing Sections | Grade |
+| Model | Provider | Fixture (`prompts.json`) | `ran_scanners` | `verified_findings` | `honored_stop_gate` | `honored_scope_lock` | Score |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Claude 3.5 Sonnet** | `vuln-app` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
-| **Claude 3.5 Sonnet** | `slop-site` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
-| **Claude 3.5 Sonnet** | `seo-spa` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
-| **Claude 3.5 Sonnet** | `clean-site` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
-| **Claude 3.5 Haiku** | `vuln-app` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
-| **Claude 3.5 Haiku** | `slop-site` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
-| **Claude 3.5 Haiku** | `seo-spa` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
-| **Claude 3.5 Haiku** | `clean-site` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
-| **GPT-4o** | `vuln-app` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
-| **GPT-4o** | `slop-site` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
-| **GPT-4o** | `seo-spa` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
-| **GPT-4o** | `clean-site` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
-| **GPT-4o-mini** | `vuln-app` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
-| **GPT-4o-mini** | `slop-site` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
-| **GPT-4o-mini** | `seo-spa` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
-| **GPT-4o-mini** | `clean-site` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
-| **Gemini 2.0 Flash** | `vuln-app` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
-| **Gemini 2.0 Flash** | `slop-site` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
-| **Gemini 2.0 Flash** | `seo-spa` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
-| **Gemini 2.0 Flash** | `clean-site` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
+| **`claude-sonnet-4-6`** | `anthropic` | `01_security_leak` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
+| **`claude-sonnet-4-6`** | `anthropic` | `02_design_slop` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
+| **`claude-sonnet-4-6`** | `anthropic` | `03_seo_broken` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
+| **`claude-sonnet-4-6`** | `anthropic` | `04_mixed_full_audit` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
+| **`gpt-4.1`** | `openai` | `01_security_leak` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
+| **`gpt-4.1`** | `openai` | `02_design_slop` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
+| **`gpt-4.1`** | `openai` | `03_seo_broken` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
+| **`gpt-4.1`** | `openai` | `04_mixed_full_audit` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
+| **`gemini-2.5-pro`** | `google` | `01_security_leak` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
+| **`gemini-2.5-pro`** | `google` | `02_design_slop` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
+| **`gemini-2.5-pro`** | `google` | `03_seo_broken` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
+| **`gemini-2.5-pro`** | `google` | `04_mixed_full_audit` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
+| **`gpt-4.1-mini`** | `openai` | `01_security_leak` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
+| **`gpt-4.1-mini`** | `openai` | `02_design_slop` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
+| **`gpt-4.1-mini`** | `openai` | `03_seo_broken` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
+| **`gpt-4.1-mini`** | `openai` | `04_mixed_full_audit` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
+| **`qwen-2.5-coder-32b`** | `openrouter` | `01_security_leak` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
+| **`qwen-2.5-coder-32b`** | `openrouter` | `02_design_slop` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
+| **`qwen-2.5-coder-32b`** | `openrouter` | `03_seo_broken` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
+| **`qwen-2.5-coder-32b`** | `openrouter` | `04_mixed_full_audit` | not measured yet | not measured yet | not measured yet | not measured yet | not measured yet |
+
+---
+
+## 4. Deterministic Scanner Benchmark (10 Cases)
+
+Measured via `node evals/run-10-cases.mjs --assert-pass` across `eval_fixtures/` (`01`–`10`):
+
+| Iteration | Active Scanners | Group A Recall (`01`–`05`) | Group B Clean Pass (`06`–`10`) | Group B False Positives |
+| :--- | :--- | :--- | :--- | :--- |
+| **Baseline (Pre-Phase 2)** | `secrets, design, html, seo` | `6/20` (`30.0%`) | `0/5` (`0.0%`) | `10` (`MISSING_ROBOTS_TXT` / `MISSING_SITEMAP_XML`) |
+| **Post-Phase 2 Upgrades** | `secrets, code-security, design, html, seo` | `20/20` (`100.0%`) | `5/5` (`100.0%`) | `0` |

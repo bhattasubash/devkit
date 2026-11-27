@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checkout Portal — QuickPay</title>
+  <meta name="description" content="Complete your invoice payment or update your billing profile securely through the QuickPay checkout portal.">
+  <link rel="canonical" href="https://quickpay.example.com/checkout">
+  <meta property="og:title" content="Checkout Portal — QuickPay">
+  <meta property="og:description" content="Complete your invoice payment through the QuickPay checkout portal.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "QuickPay",
+    "url": "https://quickpay.example.com/"
+  }
+  </script>
+</head>
+<body>
+  <main>
+    <h1>Checkout Portal</h1>
+    <div id="greeting"></div>
+
+    <form action="http://payments.insecure-example.com/charge" method="POST">
+      <label for="card-holder">Cardholder Name</label>
+      <input id="card-holder" name="cardHolder" type="text" required>
+      <button type="submit">Pay Invoice</button>
+    </form>
+
+    <p>
+      View terms on our
+      <a href="https://partner.example.com/terms" target="_blank">Partner Portal</a>.
+    </p>
+  </main>
+
+  <script>
+    const CHECKOUT_SECRET_KEY = "qp_live_checkout_secret_9876543210";
+    const params = new URLSearchParams(window.location.search);
+    const userNote = params.get("note");
+    if (userNote) {
+      document.getElementById("greeting").innerHTML = "Welcome, " + userNote;
+    }
+  </script>
+</body>
+</html>

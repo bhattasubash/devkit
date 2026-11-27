@@ -1,0 +1,28 @@
+{
+  "findings": [
+    {
+      "id": "TRAP-001",
+      "severity": "high",
+      "file": "styles.css",
+      "line": 9,
+      "quote": "color: #3b82f6;",
+      "fix": "Use a CSS variable token from :root instead of literal hex."
+    },
+    {
+      "id": "TRAP-002",
+      "severity": "high",
+      "file": "styles.css",
+      "line": 2,
+      "quote": "transition: all 200ms ease;",
+      "fix": "Line drift (> ±3 lines from line 10) must be caught by verify-findings.mjs."
+    },
+    {
+      "id": "TRAP-003",
+      "severity": "critical",
+      "file": "app.js",
+      "line": 4,
+      "quote": "target.textContent = escapeHtml(name);",
+      "fix": "Fabricated quote that does not exist in app.js must be caught by verify-findings.mjs."
+    }
+  ]
+}

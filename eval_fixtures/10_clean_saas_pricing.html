@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; object-src 'none'">
+  <title>Pricing — ClearLedger Accounting</title>
+  <meta name="description" content="Compare ClearLedger monthly seat pricing, audit log retention limits, and automated bank reconciliation quotas.">
+  <link rel="canonical" href="https://clearledger.example.com/pricing">
+  <meta property="og:title" content="Pricing — ClearLedger Accounting">
+  <meta property="og:description" content="Compare ClearLedger monthly seat pricing and audit log retention limits.">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Can I export all ledger records if I cancel?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Workspaces retain full CSV and JSON export access for 90 days after cancellation."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How are read-only auditor seats billed?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Read-only external CPA and auditor seats are free on all paid plans."
+        }
+      }
+    ]
+  }
+  </script>
+  <style>
+    :root {
+      --color-bg: #f9fafb;
+      --color-surface: #ffffff;
+      --color-ink: #111827;
+      --color-border: #e5e7eb;
+      --color-primary: #065f46;
+      --font-body: system-ui, -apple-system, 'Segoe UI', sans-serif;
+      --radius-md: 8px;
+    }
+    body {
+      margin: 0;
+      background-color: var(--color-bg);
+      color: var(--color-ink);
+      font-family: var(--font-body);
+      line-height: 1.6;
+    }
+    main, header, footer {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .plans {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
+    }
+    .plan-box {
+      background-color: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+    }
+    .cta-btn {
+      background-color: var(--color-primary);
+      color: var(--color-surface);
+      border: 0;
+      border-radius: var(--radius-md);
+      padding: 10px 18px;
+    }
+    .cta-btn:focus-visible, a:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <nav aria-label="Main navigation">
+      <a href="/">Overview</a>
+      <a href="/pricing">Pricing</a>
+      <a href="https://trust.clearledger.example.com" target="_blank" rel="noopener noreferrer">SOC 2 Report</a>
+    </nav>
+  </header>
+  <main>
+    <section aria-labelledby="pricing-title">
+      <h1 id="pricing-title">Predictable per-seat accounting plans</h1>
+      <p>Pay only for active bookkeepers; read-only auditor seats cost $0.</p>
+      <div class="plans">
+        <article class="plan-box">
+          <h2>Team Plan — $29 per active seat</h2>
+          <p>Includes 3 connected bank feeds, CSV imports, and 2-year audit trail retention.</p>
+          <button type="button" class="cta-btn">Select Team Plan</button>
+        </article>
+        <article class="plan-box">
+          <h2>Controller Plan — $59 per active seat</h2>
+          <p>Includes unlimited bank feeds, SAML SSO, and 7-year immutable ledger retention.</p>
+          <button type="button" class="cta-btn">Select Controller Plan</button>
+        </article>
+      </div>
+    </section>
+    <section aria-labelledby="faq-title">
+      <h2 id="faq-title">Billing and Data Export FAQ</h2>
+      <h3>Can I export all ledger records if I cancel?</h3>
+      <p>Yes. Workspaces retain full CSV and JSON export access for 90 days after cancellation.</p>
+      <h3>How are read-only auditor seats billed?</h3>
+      <p>Read-only external CPA and auditor seats are free on all paid plans.</p>
+    </section>
+  </main>
+  <footer>
+    <p>ClearLedger Inc.</p>
+  </footer>
+</body>
+</html>

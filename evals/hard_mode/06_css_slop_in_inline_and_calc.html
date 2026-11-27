@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Component Preview</title>
+  <meta name="description" content="Component preview page demonstrating subtle CSS width and color leaks plus clickable div markup.">
+  <style>
+    :root {
+      --color-bg: #fafafa;
+      --color-text: #171717;
+    }
+    body {
+      margin: 0;
+      width: 100vw;
+      background: var(--color-bg);
+      color: var(--color-text);
+    }
+    .hero-badge {
+      border: 1px solid #7c3aed;
+      padding: 8px 12px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Component Preview</h1>
+    <div class="hero-badge">Beta Release</div>
+    <div onClick="openMenu()">Menu</div>
+  </main>
+</body>
+</html>
