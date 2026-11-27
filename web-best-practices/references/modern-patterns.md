@@ -37,4 +37,4 @@ Before replacing a legacy pattern, verify:
 
 - When replacing a pattern, remove the legacy library from `package.json` only after confirming no other code depends on it.
 - Test the modern replacement in both the primary and fallback code paths before marking the fix as complete.
-- Record the replacement in `.devkit/web/state.json` under `decisions` with the legacy pattern, modern replacement, and reason.
+- Record the replacement in `.devkit/state.json` under `decisions` with the legacy pattern, modern replacement, and reason.
