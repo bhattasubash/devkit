@@ -208,6 +208,24 @@ async function checkScope() {
   ];
   const allIgnored = [...DEFAULT_EPHEMERAL_PATTERNS, ...userIgnored];
 
+  const gitBin = process.platform === 'win32' ? 'git.exe' : 'git';
+  try {
+    const inside = execFileSync(gitBin, ['rev-parse', '--is-inside-work-tree'], {
+      cwd: repoDir,
+      encoding: 'utf-8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+    }).trim();
+    if (inside !== 'true') {
+      throw new Error('Not inside a git work tree');
+    }
+  } catch {
+    console.error(JSON.stringify({
+      error: 'NOT_A_GIT_REPO',
+      message: `Target directory is not a git repository: ${repoDir}. Initialize git before running scope verification.`,
+    }));
+    process.exit(2);
+  }
+
   const changedFiles = getChangedFiles(repoDir, againstRef);
 
   const violations = [];

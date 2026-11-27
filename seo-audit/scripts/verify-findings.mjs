@@ -20,10 +20,11 @@
  *   2 = usage error or file reading failure
  */
 
-import { readFile, stat } from 'node:fs/promises';
+import { access, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 
 const VALID_SEVERITIES = new Set(['critical', 'high', 'medium', 'low', 'info']);
+const VALID_FINDING_TYPES = new Set(['line', 'missing_file', 'whole_file']);
 
 const args = process.argv.slice(2);
 if (args.includes('--help') || args.includes('-h') || args.length === 0) {
@@ -126,13 +127,43 @@ async function verifyAll() {
       failures.push({ index: idx, id: f.id ?? null, error: `${indexStr}: Missing or empty "fix" field` });
     }
 
-    // 4. Check file and line
+    // 4. Check finding_type (optional; defaults to "line")
+    const findingType = f.finding_type ? String(f.finding_type).toLowerCase() : 'line';
+    if (!VALID_FINDING_TYPES.has(findingType)) {
+      failures.push({
+        index: idx,
+        id: f.id ?? null,
+        error: `${indexStr}: Invalid finding_type "${f.finding_type}". Must be one of: line, missing_file, whole_file`,
+      });
+      continue;
+    }
+
+    // 5. Check file and line
     if (!f.file || typeof f.file !== 'string') {
       failures.push({ index: idx, id: f.id ?? null, error: `${indexStr}: Missing or invalid "file" path` });
       continue;
     }
 
     const targetFile = resolve(baseDir, f.file);
+
+    if (findingType === 'missing_file') {
+      try {
+        await access(targetFile);
+        failures.push({
+          index: idx,
+          id: f.id ?? null,
+          file: f.file,
+          error: `${indexStr}: Expected missing file "${f.file}", but it exists on disk`,
+        });
+      } catch {
+        // Expected: file is confirmed missing
+      }
+      if (f.quote === undefined || f.quote === null || String(f.quote).trim() === '') {
+        failures.push({ index: idx, id: f.id ?? null, file: f.file, line: f.line, error: `${indexStr}: Missing or empty "quote"` });
+      }
+      continue;
+    }
+
     let lines = fileCache.get(targetFile);
 
     if (!lines) {
@@ -152,6 +183,23 @@ async function verifyAll() {
     }
 
     const lineNum = Number(f.line);
+    if (findingType === 'whole_file') {
+      if (!Number.isInteger(lineNum) || lineNum < 0 || lineNum > lines.length) {
+        failures.push({
+          index: idx,
+          id: f.id ?? null,
+          file: f.file,
+          line: f.line,
+          error: `${indexStr}: Line ${f.line} out of range (0..${lines.length}) for whole_file finding in ${f.file}`,
+        });
+        continue;
+      }
+      if (f.quote === undefined || f.quote === null || String(f.quote).trim() === '') {
+        failures.push({ index: idx, id: f.id ?? null, file: f.file, line: f.line, error: `${indexStr}: Missing or empty "quote"` });
+      }
+      continue;
+    }
+
     if (!Number.isInteger(lineNum) || lineNum < 1 || lineNum > lines.length) {
       failures.push({
         index: idx,
