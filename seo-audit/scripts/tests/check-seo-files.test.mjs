@@ -150,3 +150,28 @@ test('Flags missing robots.txt sitemap, sitemap fragments, missing canonical, br
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test('Flags noindex, missing JSON-LD, AEO vague headings, and Next.js client metadata export', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'aeo-seo-'));
+  try {
+    await writeFile(join(dir, 'robots.txt'), 'User-agent: *\nSitemap: https://example.com/sitemap.xml\n');
+    await writeFile(join(dir, 'sitemap.xml'), '<urlset><url><loc>https://example.com/</loc></url></urlset>');
+    await writeFile(join(dir, 'page.html'), `<!DOCTYPE html><html lang="en"><head>
+      <meta name="robots" content="noindex">
+      <link rel="canonical" href="https://example.com/">
+      <meta property="og:title" content="Test"><meta property="og:description" content="Test">
+    </head><body><main><h1>Product</h1><h2>Learn More</h2><h2>Overview</h2></main></body></html>`);
+    await writeFile(join(dir, 'client-page.tsx'), `'use client';\nexport const metadata = { title: 'Ignored' };`);
+
+    const res = runSeoChecker(dir);
+    assert.equal(res.exitCode, 1);
+    const rules = new Set(res.data.findings.map((f) => f.rule));
+    assert.ok(rules.has('META_ROBOTS_NOINDEX'));
+    assert.ok(rules.has('MISSING_JSONLD'));
+    assert.ok(rules.has('AEO_VAGUE_HEADINGS'));
+    assert.ok(rules.has('AEO_NO_LLMS_TXT_REF'));
+    assert.ok(rules.has('NEXT_CLIENT_METADATA_IGNORED'));
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});

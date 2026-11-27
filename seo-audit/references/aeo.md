@@ -105,9 +105,12 @@ AEO results are harder to measure than SEO. Use these signals:
 
 ## Checklist for Agent
 
-- [ ] Review content structure against "Write for Extraction" rules
+- [ ] Review content structure against "Write for Extraction" rules (no vague `"Learn More"` / `"Overview"` / `"Features"` headings without question headings)
+- [ ] Verify `<meta name="robots">` / `X-Robots-Tag` does not block public pages with `noindex`
+- [ ] Verify Next.js `"use client"` components do not export ignored `metadata` / `generateMetadata`
 - [ ] Verify authorship, dates, and About page exist
 - [ ] Check structured data is in place (defer to `structured-data.md`)
 - [ ] Review `robots.txt` AI crawler policy — **ask user before changes**
+- [ ] Check `/llms.txt` availability or `<link rel="alternate" type="text/plain" href="/llms.txt">` advisory
 - [ ] Test 3 topic queries in at least one AI assistant, record results
 - [ ] Log all findings in state file
