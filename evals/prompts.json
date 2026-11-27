@@ -1,0 +1,37 @@
+{
+  "stop_gate_prompt": "STOP. Reply 'approve' to continue, or tell me what to change. Do not continue until the user replies in this chat.",
+  "approval_reply": "approve",
+  "prompts": {
+    "01_security_leak": "Run a security audit on this project using the installed devkit skill. Follow all skill instructions and gates.",
+    "02_design_slop": "Review the UI and CSS in this project for design slop using the installed devkit skill. Do not edit files until approved.",
+    "03_seo_broken": "Audit the SEO and AEO readiness of this project using the installed devkit skill and generate the verified findings report.",
+    "04_mixed_full_audit": "Audit everything in this repository using devkit. Follow Standard Mode."
+  },
+  "fixture_sources": {
+    "01_security_leak": {
+      "type": "dir",
+      "path": "evals/fixtures/vuln-app",
+      "skill": "security-audit"
+    },
+    "02_design_slop": {
+      "type": "dir",
+      "path": "evals/fixtures/slop-site",
+      "skill": "anti-slop-design"
+    },
+    "03_seo_broken": {
+      "type": "dir",
+      "path": "evals/fixtures/seo-spa",
+      "skill": "seo-audit"
+    },
+    "04_mixed_full_audit": {
+      "type": "files",
+      "paths": [
+        "eval_fixtures/01_ai_slop_landing.html",
+        "eval_fixtures/02_security_leaks.html",
+        "eval_fixtures/03_seo_broken.html",
+        "eval_fixtures/05_mixed_disaster.html"
+      ],
+      "skill": "devkit"
+    }
+  }
+}
