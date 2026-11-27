@@ -127,3 +127,29 @@ body {
     await rm(dir, { recursive: true, force: true });
   }
 });
+
+test('Discriminates AntiSlopUI-style slop.tsx vs clean.tsx and detects inline HTML <style> slop', () => {
+  const slopTsx = join(__dirname, '..', '..', '..', 'evals', 'fixtures', 'antislop-golden', 'slop.tsx');
+  const cleanTsx = join(__dirname, '..', '..', '..', 'evals', 'fixtures', 'antislop-golden', 'clean.tsx');
+  const slopHtml = join(__dirname, '..', '..', '..', 'eval_fixtures', '01_ai_slop_landing.html');
+
+  const slopRes = runLinter(slopTsx);
+  assert.equal(slopRes.exitCode, 1);
+  const tsxRules = new Set(slopRes.data.findings.map((f) => f.rule));
+  assert.ok(tsxRules.has('AI_PURPLE_BLUE_GRADIENT'));
+  assert.ok(tsxRules.has('ARBITRARY_SPACING_TAILWIND'));
+  assert.ok(tsxRules.has('AI_COPY_CLICHE'));
+  assert.ok(tsxRules.has('REPEATED_ICON_CARD_GRID'));
+  assert.ok(tsxRules.has('DIV_ONCLICK'));
+
+  const cleanRes = runLinter(cleanTsx);
+  assert.equal(cleanRes.exitCode, 0, `Expected 0 findings on clean.tsx, got: ${JSON.stringify(cleanRes.data.findings)}`);
+
+  const htmlRes = runLinter(slopHtml);
+  assert.equal(htmlRes.exitCode, 1);
+  const htmlRules = new Set(htmlRes.data.findings.map((f) => f.rule));
+  assert.ok(htmlRules.has('AI_PURPLE_BLUE_GRADIENT'));
+  assert.ok(htmlRules.has('AI_DEFAULT_FONT'));
+  assert.ok(htmlRules.has('AI_COPY_CLICHE'));
+  assert.ok(htmlRules.has('REPEATED_ICON_CARD_GRID'));
+});
